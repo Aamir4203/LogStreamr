@@ -1,0 +1,11 @@
+2025-02-18 10:05:41,295 - INFO - Received form data: ImmutableMultiDict([('clientName', 'Theory'), ('startDate', '2025-02-01'), ('endDate', '2025-02-07'), ('residualStart', '2025-02-13'), ('week', 'W1'), ('addedBy', 'AKhan'), ('percentageInput', '1'), ('requestType', '1'), ('filePath', ''), ('reportpath', ''), ('qspath', '/u1/techteam/Aamir.txt'), ('options', 'Y'), ('cs_option', '/u1/techteam/Aamir.txt'), ('input_query', 'select * from table;')])
+2025-02-18 10:05:41,343 - INFO - Received form data: ImmutableMultiDict([('clientName', 'Theory'), ('startDate', '2025-02-01'), ('endDate', '2025-02-07'), ('residualStart', '2025-02-13'), ('week', 'W1'), ('addedBy', 'AKhan'), ('percentageInput', '1'), ('requestType', '1'), ('filePath', ''), ('reportpath', ''), ('qspath', '/u1/techteam/Aamir.txt'), ('options', 'Y'), ('cs_option', '/u1/techteam/Aamir.txt'), ('input_query', 'select * from table;')])
+2025-02-18 10:05:41,345 - INFO - Client Name: Theory
+2025-02-18 10:05:41,369 - INFO - Data inserted successfully.
+[2025-08-08 03:41:30 -0400] [1794244] [INFO] Starting gunicorn 22.0.0
+[2025-08-08 03:41:30 -0400] [1794244] [INFO] Listening at: http://10.100.5.121:5000 (1794244)
+[2025-08-08 03:41:30 -0400] [1794244] [INFO] Using worker: sync
+[2025-08-08 03:41:30 -0400] [1794250] [INFO] Booting worker with pid: 1794250
+[2025-08-08 03:41:30 -0400] [1794251] [INFO] Booting worker with pid: 1794251
+[2025-08-08 03:41:30 -0400] [1794252] [INFO] Booting worker with pid: 1794252
+[2025-08-08 03:41:30 -0400] [1794253] [INFO] Booting worker with pid: 1794253

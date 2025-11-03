@@ -1,0 +1,17 @@
+2025-02-10 09:46:07,537 - INFO - Client Name: 
+2025-02-10 09:46:07,557 - WARNING - Client not found: 
+[2025-02-11 12:40:06 -0500] [2415398] [INFO] Starting gunicorn 22.0.0
+[2025-02-11 12:40:06 -0500] [2415398] [INFO] Listening at: http://10.100.5.121:5000 (2415398)
+[2025-02-11 12:40:06 -0500] [2415398] [INFO] Using worker: sync
+[2025-02-11 12:40:06 -0500] [2415400] [INFO] Booting worker with pid: 2415400
+[2025-02-11 12:40:06 -0500] [2415401] [INFO] Booting worker with pid: 2415401
+[2025-02-11 12:40:06 -0500] [2415402] [INFO] Booting worker with pid: 2415402
+[2025-02-11 12:40:06 -0500] [2415403] [INFO] Booting worker with pid: 2415403
+[2025-02-11 12:45:41 -0500] [2415400] [INFO] Parent changed, shutting down: <Worker 2415400>
+[2025-02-11 12:45:41 -0500] [2415401] [INFO] Parent changed, shutting down: <Worker 2415401>
+[2025-02-11 12:45:41 -0500] [2415403] [INFO] Parent changed, shutting down: <Worker 2415403>
+[2025-02-11 12:45:41 -0500] [2415400] [INFO] Worker exiting (pid: 2415400)
+[2025-02-11 12:45:41 -0500] [2415403] [INFO] Worker exiting (pid: 2415403)
+[2025-02-11 12:45:41 -0500] [2415401] [INFO] Worker exiting (pid: 2415401)
+[2025-02-11 12:45:41 -0500] [2415402] [INFO] Parent changed, shutting down: <Worker 2415402>
+[2025-02-11 12:45:41 -0500] [2415402] [INFO] Worker exiting (pid: 2415402)

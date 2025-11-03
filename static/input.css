@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+body{
+    overflow-x: hidden;
+    overflow-y:scroll;
+}
+
+#requestData thead th, #requestData tbody td, #requestData tfoot th {
+    
+}
+#requestData tbody td {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+/* DataTables wrapper styling adjustments */
+.dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_length,
+.dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_paginate {
+    display: none; 
+}
+.dt-length, .dt-search{
+    display: none !important; 
+}
+
+.-translate-x-full {
+    --tw-translate-x: -100%;
+    transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+
+
+.status-E {
+    background-color: #EDB95E;
+}
+.status-R {
+    background-color: #E23636; 
+}
+.status-C {
+    background-color: #82DD55;
+}
+
+.action-repeat{
+    background-color:#4A90E2;
+    color:#ffffff;
+    cursor:pointer;
+    
+}

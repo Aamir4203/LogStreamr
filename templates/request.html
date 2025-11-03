@@ -1,0 +1,653 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/@themesberg/flowbite@1.1.0/dist/flowbite.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.5/css/dataTables.tailwindcss.css" />
+    <link href="{{ url_for('static', filename='output.css') }}" rel="stylesheet">
+
+  <title>LogStreamR</title>
+  <style>
+    @media (min-width: 768px){
+        .main.active{
+            margin-left: 0px;
+            width: 100%;
+        }
+    }
+
+
+    .custom-col-width {
+      
+    }
+
+    </style>
+</head>
+<body class="text-gray-800 font-inter">
+
+      <!--sidenav -->
+    <div class="fixed left-0 top-0 w-60 h-full bg-white p-4 pt-2 z-50 sidebar-menu transition-transform">
+        <a href="apt-tool.html" class="flex flex-col items-center pb-3 border-b border-b-gray-800 px-5">
+			<img src="{{ url_for('static', filename='images/aptroid.png') }}" class="" alt="Aptroid Logo">
+            <!-- <h2 class="font-bold text-base">Attribution Processing </h2> -->
+            <!-- <h2 class="font-bold text-base bg-[#f84525] text-white w-full text-center">Tool</h2> -->
+        </a>
+        <ul class="mt-4">
+            <!-- <span class="text-gray-400 font-bold">ADMIN</span> -->
+            <li class="mb-1 group">
+                <a href="apt-tool.html" class="flex font-semibold items-center py-2 px-4 text-[#545454] hover:bg-[#004764] hover:text-gray-100 rounded-md group-[.active]:bg-gray-800 group-[.active]:text-white group-[.selected]:bg-[#004764] group-[.selected]:text-gray-100">
+                    <i class="ri-home-2-line mr-3 text-lg"></i>
+                    <span class="text-sm">Dashboard</span>
+                </a>
+            </li>
+			<li class="mb-1 group">
+                <a href="addRequest.html" class="flex font-semibold items-center py-2 px-4 text-[#545454] hover:bg-[#004764] hover:text-gray-100 rounded-md group-[.active]:bg-gray-800 group-[.active]:text-white group-[.selected]:bg-[#004764] group-[.selected]:text-gray-100">
+                    
+					<i class="ri-add-circle-fill mr-3 text-lg"></i>
+                    <span class="text-sm">Add Request</span>
+                </a>
+            </li>
+            <li class="mb-1 group">
+                <a href="" class="flex font-semibold items-center py-2 px-4 text-[#545454] hover:bg-[#004764] hover:text-gray-100 rounded-md group-[.active]:bg-gray-800 group-[.active]:text-white group-[.selected]:bg-[#004764] group-[.selected]:text-gray-100 sidebar-dropdown-toggle">  
+					<i class="ri-draft-fill mr-3 text-lg"></i>						
+                    <span class="text-sm">Reports</span>
+                    <i class="ri-arrow-right-s-line ml-auto group-[.selected]:rotate-90"></i>
+                </a>
+                <ul class="pl-7 mt-2 hidden group-[.selected]:block">
+                    <li class="mb-4">
+                        <a href="request.html" class="text-[#545454] text-sm flex items-center hover:text-[#7b9f2d] before:contents-[''] before:w-1 before:h-1 before:rounded-full before:bg-gray-300 before:mr-3">Request</a>
+                    </li> 
+                </ul>
+            </li>
+        </ul>
+    </div>
+    <div class="fixed top-0 left-0 w-full h-full bg-black/50 z-40 md:hidden sidebar-overlay"></div>
+    <!-- end sidenav -->
+
+    <main class="w-full md:w-[calc(100%-240px)] md:ml-60 bg-gray-200 min-h-screen transition-all main ">
+        <!-- navbar -->
+        <div class="py-2 px-6 bg-white flex items-center shadow-md shadow-black/5 sticky top-0 left-0 z-30">
+            <button type="button" class="text-lg text-[#545454] font-semibold sidebar-toggle">
+                <i class="ri-menu-line"></i>
+            </button>
+			
+			<h2 class="font-bold uppercase ml-3 text-xl tracking-wider">LogStreamR</h2> 
+			
+            <ul class="ml-auto flex items-center">
+                <li class="mr-1 dropdown">
+                    <button type="button" class="dropdown-toggle text-gray-400 mr-4 w-8 h-8 rounded flex items-center justify-center  hover:text-gray-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" class="hover:bg-gray-100 rounded-full" viewBox="0 0 24 24" style="fill: gray;transform:msFilter;"><path d="M19.023 16.977a35.13 35.13 0 0 1-1.367-1.384c-.372-.378-.596-.653-.596-.653l-2.8-1.337A6.962 6.962 0 0 0 16 9c0-3.859-3.14-7-7-7S2 5.141 2 9s3.14 7 7 7c1.763 0 3.37-.66 4.603-1.739l1.337 2.8s.275.224.653.596c.387.363.896.854 1.384 1.367l1.358 1.392.604.646 2.121-2.121-.646-.604c-.379-.372-.885-.866-1.391-1.36zM9 14c-2.757 0-5-2.243-5-5s2.243-5 5-5 5 2.243 5 5-2.243 5-5 5z"></path></svg>                    
+                    </button>
+                    <div class="dropdown-menu shadow-md shadow-black/5 z-30 hidden max-w-xs w-full bg-white rounded-md border border-gray-100">
+                        <form action="" class="p-4 border-b border-b-gray-100">
+                            <div class="relative w-full">
+                                <input type="text" class="py-2 pr-4 pl-10 bg-gray-50 w-full outline-none border border-gray-100 rounded-md text-sm focus:border-blue-500" placeholder="Search...">
+                                <i class="ri-search-line absolute top-1/2 left-4 -translate-y-1/2 text-[#545454]"></i>
+                            </div>
+                        </form>
+                    </div>
+                </li>
+              
+                <button id="fullscreen-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" class="hover:bg-gray-100 rounded-full" viewBox="0 0 24 24" style="fill: gray; transform:msFilter;"><path d="M5 5h5V3H3v7h2zm5 14H5v-5H3v7h7zm11-5h-2v5h-5v2h7zm-2-4h2V3h-7v2h5z"></path></svg>
+                </button>
+
+                <li class="dropdown ml-3">
+                    <button type="button" class="dropdown-toggle flex items-center">
+                        <div class="flex-shrink-0 w-10 h-10 relative">
+                            <div class="p-1 bg-white rounded-full focus:outline-none focus:ring">
+                                <img class="w-8 h-8 rounded-full" src="{{ url_for('static', filename='images/user-icon.png') }}" alt="User Icon"/>
+                                <div class="top-0 left-7 absolute w-3 h-3 bg-lime-400 border-2 border-white rounded-full animate-ping"></div>
+                                <div class="top-0 left-7 absolute w-3 h-3 bg-lime-500 border-2 border-white rounded-full"></div>
+                            </div>
+                        </div>
+                        <div class="p-2 md:block text-left">
+                            <h2 class="text-sm font-semibold text-gray-800">Aamir</h2>
+                            <p class="text-xs text-gray-500">Admin</p>
+                        </div>                
+                    </button>
+                    <ul class="dropdown-menu shadow-md shadow-black/5 z-30 hidden py-1.5 rounded-md bg-white border border-gray-100 w-full max-w-[140px]">
+                        <!-- <li> -->
+                            <!-- <a href="#" class="flex items-center text-[13px] py-1.5 px-4 text-gray-600 hover:text-[#f84525] hover:bg-gray-50">Profile</a> -->
+                        <!-- </li> -->
+                        <!-- <li> -->
+                            <!-- <a href="#" class="flex items-center text-[13px] py-1.5 px-4 text-gray-600 hover:text-[#f84525] hover:bg-gray-50">Settings</a> -->
+                        <!-- </li> -->
+                        <li>
+                            <form method="POST" action="">
+                                <a role="menuitem" class="flex items-center text-[13px] py-1.5 px-4 text-gray-600 hover:text-[#f84525] hover:bg-gray-50 cursor-pointer"
+                                    onclick="event.preventDefault();
+                                    this.closest('form').submit();">
+                                    Log Out
+                                </a>
+                            </form>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <!-- end navbar -->
+
+      <!-- Content -->
+	<div class="p-6">
+		<div class="grid grid-cols-1 gap-6 mb-6">
+			<div class="bg-white rounded-md border border-gray-100 p-6 shadow-md shadow-black/5">
+			
+			
+			
+			
+				<!-- component -->
+<section class="container px-4 mx-auto">
+    <div class="flex">
+        <div class="-mx-4 -my-2  sm:-mx-6 lg:-mx-8">
+            <div class="inline-block p-1 align-middle">
+        <div class=" ">
+
+            <div class="flex gap-2 mb-0 justify-end">
+                <label class="self-center">Search:</label>
+                <select id="columnSelect" class="w-1/6 block appearance-none bg-white border border-gray-300 text-gray-700 py-2 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
+                    <option value="0">Request ID</option>
+                    <option value="1">Client Name</option>
+                    <option value="2">Added By</option>
+                    <option value="4">Status</option>
+                </select>
+                <input type="text" id="columnSearch" placeholder="Search Here..." class="w-1/6 shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+      
+
+                <button id="addClient" class="px-3 text-lg text-[#7B9F2D] bg-gray-100 hover:bg-gray-200 border hover:border-[#7B9F2D] rounded"><i class="ri-filter-2-fill"></i></button>
+            </div>
+
+            <table id="requestData" class="w-full ">
+                <thead class="bg-[#004764] text-white">
+                    <tr>
+                        <th scope="col" class="custom-col-width border p-1 text-sm font-normal text-center text-white dark:text-gray-400 truncate overflow-hidden whitespace-nowrap">
+                            Id
+                        </th>
+                        <th scope="col" class="custom-col-width border p-1 text-sm font-normal text-center text-white dark:text-gray-400 truncate overflow-hidden whitespace-nowrap">
+                            ClientName
+                        </th>
+                        <th scope="col" class="custom-col-width border p-1 text-sm font-normal text-center text-white dark:text-gray-400 truncate overflow-hidden whitespace-nowrap">
+                            Added By
+                        </th>
+                        <th scope="col" class="custom-col-width border p-1 text-sm font-normal text-center text-white dark:text-gray-400 truncate overflow-hidden whitespace-nowrap">
+                            TRT
+                        </th>
+                        <th scope="col" class="custom-col-width border p-1 text-sm font-normal text-center text-white dark:text-gray-400 truncate overflow-hidden whitespace-nowrap">
+                            Status
+                        </th>
+                        <th scope="col" class="custom-col-width border p-1 text-sm font-normal text-center text-white dark:text-gray-400 truncate overflow-hidden whitespace-nowrap">
+                            Desc
+                        </th>
+                        <th scope="col" class="custom-col-width border p-1 text-sm font-normal text-center text-white dark:text-gray-400 truncate overflow-hidden whitespace-nowrap">
+                            Execution Time
+                        </th>
+                        <th scope="col" class="custom-col-width border p-1 text-sm font-normal text-center text-white dark:text-gray-400 truncate overflow-hidden whitespace-nowrap">
+                            ReRun
+                        </th>
+                        <th scope="col" class="custom-col-width border p-1 text-sm font-normal text-center text-white dark:text-gray-400 truncate overflow-hidden whitespace-nowrap">
+                            Cancel/Kill
+                        </th>
+                        <th scope="col" class="custom-col-width border p-1 text-sm font-normal text-center text-white dark:text-gray-400 truncate overflow-hidden whitespace-nowrap">
+                            View
+                        </th>
+                        <th scope="col" class="custom-col-width border p-1 text-sm font-normal text-center text-white dark:text-gray-400 truncate overflow-hidden whitespace-nowrap">
+                            Download
+                        </th>
+                        <th scope="col" class="custom-col-width border p-1 text-sm font-normal text-center text-white dark:text-gray-400 truncate overflow-hidden whitespace-nowrap">
+                            Upload
+                        </th>
+                        <th scope="col" class="custom-col-width border p-1 text-sm font-normal text-center text-white dark:text-gray-400 truncate overflow-hidden whitespace-nowrap">
+                            Validate
+                        </th>
+                        <th scope="col" class="custom-col-width border p-1 text-sm font-normal text-center text-white dark:text-gray-400 truncate overflow-hidden whitespace-nowrap">
+                            ADP
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200 dark:divide-gray-700 dark:bg-gray-900">
+                    {% for log in logs %}
+                    <tr>
+                        <td class="text-center">{{ log[0] }}</td>
+                        <td class="text-center">{{ log[1] }}</td>
+                        <td class="text-center">{{ log[2] }}</td>
+                        <td class="text-center">{{ log[3] }}</td>
+                        <td class="text-center">{{ log[4] }}</td>
+                        <td class="text-center">{{ log[5] }}</td>
+                        <td class="text-center">{{ log[6] }}</td>
+                        
+                        <!-- ReRun Button - only for completed/errored -->
+                        <td class="text-center">
+                            {% if log[4] in ['C', 'E'] %}
+                            <button onclick="openReRunModal('{{ log[0] }}')" class="bg-blue-500 text-white px-2 py-1 text-xs rounded hover:bg-blue-600" title="ReRun">
+                                <i class="ri-refresh-line"></i>
+                            </button>
+                            {% endif %}
+                        </td>
+                        
+                        <!-- Cancel/Kill Button -->
+                        <td class="text-center">
+                            <button onclick="confirmCancel('{{ log[0] }}')" class="bg-red-500 text-white px-2 py-1 text-xs rounded hover:bg-red-600" title="Cancel/Kill">
+                                <i class="ri-close-line"></i>
+                            </button>
+                        </td>
+                        
+                        <!-- View Button - only for completed -->
+                        <td class="text-center">
+                            {% if log[4] == 'C' %}
+                            <button onclick="openViewModal('{{ log[0] }}')" class="bg-green-500 text-white px-2 py-1 text-xs rounded hover:bg-green-600" title="View">
+                                <i class="ri-eye-line"></i>
+                            </button>
+                            {% endif %}
+                        </td>
+                        
+                        <!-- Download Button - only for completed -->
+                        <td class="text-center">
+                            {% if log[4] == 'C' %}
+                            <button onclick="downloadExcel('{{ log[0] }}')" class="bg-purple-500 text-white px-2 py-1 text-xs rounded hover:bg-purple-600" title="Download">
+                                <i class="ri-download-line"></i>
+                            </button>
+                            {% endif %}
+                        </td>
+                        
+                        <!-- File Upload Button - only for completed -->
+                        <td class="text-center">
+                            {% if log[4] == 'C' %}
+                            <button onclick="openUploadModal('{{ log[0] }}')" class="bg-orange-500 text-white px-2 py-1 text-xs rounded hover:bg-orange-600" title="Upload">
+                                <i class="ri-upload-line"></i>
+                            </button>
+                            {% endif %}
+                        </td>
+                        
+                        <!-- Validate Button -->
+                        <td class="text-center">
+                            <button onclick="validateRequest('{{ log[0] }}')" class="bg-yellow-500 text-white px-2 py-1 text-xs rounded hover:bg-yellow-600" title="Validate">
+                                <i class="ri-check-line"></i>
+                            </button>
+                        </td>
+                        
+                        <!-- ADP Button -->
+                        <td class="text-center">
+                            <button onclick="adpRequest('{{ log[0] }}')" class="bg-indigo-500 text-white px-2 py-1 text-xs rounded hover:bg-indigo-600" title="ADP">
+                                ADP
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- <div class="flex items-center justify-between mt-6">
+        <a href="#" class="flex items-center px-5 py-2 text-sm text-gray-700 capitalize transition-colors duration-200 bg-white border rounded-md gap-x-2 hover:bg-gray-100 dark:bg-gray-900 dark:text-gray-200 dark:border-gray-700 dark:hover:bg-gray-800">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 rtl:-scale-x-100">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 15.75L3 12m0 0l3.75-3.75M3 12h18" />
+            </svg>
+
+            <span>
+                previous
+            </span>
+        </a>
+
+        <div class="items-center hidden md:flex gap-x-3">
+            <a href="#" class="px-2 py-1 text-sm text-blue-500 rounded-md dark:bg-gray-800 bg-blue-100/60">1</a>
+            <a href="#" class="px-2 py-1 text-sm text-gray-500 rounded-md dark:hover:bg-gray-800 dark:text-gray-300 hover:bg-gray-100">2</a>
+            <a href="#" class="px-2 py-1 text-sm text-gray-500 rounded-md dark:hover:bg-gray-800 dark:text-gray-300 hover:bg-gray-100">3</a>
+            <a href="#" class="px-2 py-1 text-sm text-gray-500 rounded-md dark:hover:bg-gray-800 dark:text-gray-300 hover:bg-gray-100">...</a>
+            <a href="#" class="px-2 py-1 text-sm text-gray-500 rounded-md dark:hover:bg-gray-800 dark:text-gray-300 hover:bg-gray-100">12</a>
+            <a href="#" class="px-2 py-1 text-sm text-gray-500 rounded-md dark:hover:bg-gray-800 dark:text-gray-300 hover:bg-gray-100">13</a>
+            <a href="#" class="px-2 py-1 text-sm text-gray-500 rounded-md dark:hover:bg-gray-800 dark:text-gray-300 hover:bg-gray-100">14</a>
+        </div>
+
+        <a href="#" class="flex items-center px-5 py-2 text-sm text-gray-700 capitalize transition-colors duration-200 bg-white border rounded-md gap-x-2 hover:bg-gray-100 dark:bg-gray-900 dark:text-gray-200 dark:border-gray-700 dark:hover:bg-gray-800">
+            <span>
+                Next
+            </span>
+
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 rtl:-scale-x-100">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 8.25L21 12m0 0l-3.75 3.75M21 12H3" />
+            </svg>
+        </a>
+    </div> -->
+</section>
+
+
+
+ <!-- Modal Start-->
+ <div id="addClientModal" class="fixed z-10 inset-0 overflow-y-auto hidden">
+    <div class="flex items-center justify-center min-h-screen ">
+        <div class="bg-white w-3/6 rounded shadow-md border ">
+
+            <div class="flex justify-between bg-[#004764] p-3 rounded-sm">
+                <label for="name" class="block text-white text-sm font-bold">Select The Table Columns</label>
+                <button id="closeAddClient" class="text-white hover:text-red-500">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="px-2">
+                <div id="checkboxArea" class="grid grid-cols-3 gap-1 py-2 px-1">
+            </div>
+            </div>
+        </div>
+    </div>
+</div>
+ <!-- Modal End-->
+
+<!-- ReRun Modal -->
+<div id="reRunModal" class="fixed z-10 inset-0 overflow-y-auto hidden">
+    <div class="flex items-center justify-center min-h-screen">
+        <div class="bg-white w-1/3 rounded shadow-md border">
+            <div class="flex justify-between bg-[#004764] p-3 rounded-sm">
+                <label class="block text-white text-sm font-bold">Select Module to ReRun</label>
+                <button onclick="closeReRunModal()" class="text-white hover:text-red-500">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="p-4">
+                <select id="reRunModule" class="w-full border border-gray-300 rounded-md px-3 py-2 mb-4">
+                    <option value="">Select Module</option>
+                    <option value="trt">TRT Module</option>
+                    <option value="logs">Logs Module</option>
+                    <option value="suppression">Client Suppression Module</option>
+                    <option value="source">Source Module</option>
+                    <option value="report">Report Module</option>
+                    <option value="timestamps">TimeStamps Module</option>
+                    <option value="ip">IP Module</option>
+                    <option value="repull">RePull</option>
+                </select>
+                <div class="flex justify-end gap-2">
+                    <button onclick="closeReRunModal()" class="bg-gray-500 text-white px-4 py-2 rounded">Cancel</button>
+                    <button onclick="confirmReRun()" class="bg-blue-500 text-white px-4 py-2 rounded">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- View Modal -->
+<div id="viewModal" class="fixed z-10 inset-0 overflow-y-auto hidden">
+    <div class="flex items-center justify-center min-h-screen">
+        <div class="bg-white w-2/3 rounded shadow-md border">
+            <div class="flex justify-between bg-[#004764] p-3 rounded-sm">
+                <label class="block text-white text-sm font-bold">Request Details</label>
+                <button onclick="closeViewModal()" class="text-white hover:text-red-500">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="p-4">
+                <div id="viewContent" class="space-y-2">
+                    <!-- Key-value pairs will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Upload Modal -->
+<div id="uploadModal" class="fixed z-10 inset-0 overflow-y-auto hidden">
+    <div class="flex items-center justify-center min-h-screen">
+        <div class="bg-white w-1/2 rounded shadow-md border">
+            <div class="flex justify-between bg-[#004764] p-3 rounded-sm">
+                <label class="block text-white text-sm font-bold">File Upload Configuration</label>
+                <button onclick="closeUploadModal()" class="text-white hover:text-red-500">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="p-4 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Select FTP:</label>
+                    <select id="ftpSelect" class="w-full border border-gray-300 rounded-md px-3 py-2">
+                        <option value="green-zxds">green-zxds</option>
+                        <option value="pubgreen">pubgreen</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">FTP Path:</label>
+                    <input type="text" id="ftpPath" class="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="Enter FTP path">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Header:</label>
+                    <div class="space-y-2">
+                        <label class="flex items-center">
+                            <input type="radio" name="headerType" value="standard" checked class="mr-2">
+                            Standard (default)
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="headerType" value="custom" class="mr-2">
+                            Custom
+                        </label>
+                    </div>
+                </div>
+                <div id="customColumns" class="hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Select Columns:</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <label class="flex items-center">
+                            <input type="checkbox" value="column1" class="mr-2"> Column 1
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" value="column2" class="mr-2"> Column 2
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" value="column3" class="mr-2"> Column 3
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" value="column4" class="mr-2"> Column 4
+                        </label>
+                    </div>
+                </div>
+                <div class="flex justify-end gap-2">
+                    <button onclick="closeUploadModal()" class="bg-gray-500 text-white px-4 py-2 rounded">Cancel</button>
+                    <button onclick="submitUpload()" class="bg-green-500 text-white px-4 py-2 rounded">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+			</div>
+		</div>
+    </div>
+      <!-- End Content -->
+    </main>
+  
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/@themesberg/flowbite@1.1.0/dist/flowbite.bundle.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <script src="https://cdn.datatables.net/2.0.5/js/dataTables.js"></script>
+    <script src="https://cdn.datatables.net/2.0.5/js/dataTables.tailwindcss.js"></script>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+            <script>
+            // Global variables for modals
+            let currentRequestId = null;
+            
+            $(document).ready(function() {
+                var table = $('#requestData').DataTable({
+                    "responsive": true,
+                    "paging": true,
+                    "ordering": false, 
+                    "paging": true,
+                    "pageLength": 50,
+                    // scrollX: true,
+                     //scrollY: '55vh', 
+                     "rowCallback": function(row, data, index) {
+                        var status = data[4];
+                        var $td = $('td:eq(4)', row);
+                        $td.removeClass('status-E status-R status-C'); 
+
+                        if (status === 'E') {
+                        $td.addClass('status-E');
+                    } else if (status === 'R') {
+                        $td.addClass('status-R');
+                    } else if (status === 'C') {
+                        $td.addClass('status-C');
+                    }
+                }
+            });
+        
+            $('#columnSelect').on('change', function () {
+                $('#columnSearch').val(''); // Clear input on column change
+                table.columns().search(''); // Clear column search on change
+            });
+        
+            $('#columnSearch').on('keyup', function () {
+                var colIndex = $('#columnSelect').val();
+                table.column(colIndex).search(this.value).draw();
+            });
+
+            $('.col-span-2').addClass('overflow-auto');
+
+
+            var columns = ["Request ID", "Client Name", "Added By", "TRT File Count", "Status", "Desc", "Created Time", "Execution Time", "Unsub Hards Suppression Count", "Offer ID Suppression Count", "Client Suppression Count", "Max Touch Count", "Last Week Delivered Inserted Count", "Unsub Inserted Count", "Unique Delivered Count", "Total Delivered Count", "Newly Added Records Count", "Newly Added IP Count", "Total Running Unique Count", "Delivered Table"];
+            var checkboxesHtml = columns.map(function(title, index) {
+                return '<div class=""><input type="checkbox" checked class="form-checkbox h-4 w-4 text-[#7B9F2D] focus:ring-[#7B9F2D]" id="col-' + (index + 1) + '"><label for="col-' + (index + 1) + '" class="ml-1 text-gray-900 text-sm whitespace-nowrap">' + title + '</label></div>';
+            }).join('');
+            document.getElementById('checkboxArea').innerHTML = checkboxesHtml;
+
+            $('input[type="checkbox"]').change(function() {
+                var columnIndex = $(this).attr('id').split('-')[1];
+                $('th:nth-child(' + columnIndex + '), td:nth-child(' + columnIndex + ')').toggle();
+            });
+        });
+
+        // ReRun Modal Functions
+        function openReRunModal(requestId) {
+            currentRequestId = requestId;
+            document.getElementById('reRunModal').classList.remove('hidden');
+        }
+
+        function closeReRunModal() {
+            document.getElementById('reRunModal').classList.add('hidden');
+            document.getElementById('reRunModule').value = '';
+        }
+
+        function confirmReRun() {
+            const module = document.getElementById('reRunModule').value;
+            if (!module) {
+                alert('Please select a module');
+                return;
+            }
+            
+            // TODO: Implement API call
+            console.log('ReRunning request', currentRequestId, 'with module:', module);
+            alert('ReRun request submitted for module: ' + module);
+            closeReRunModal();
+        }
+
+        // View Modal Functions
+        function openViewModal(requestId) {
+            currentRequestId = requestId;
+            // TODO: Fetch request details from API
+            const viewContent = document.getElementById('viewContent');
+            viewContent.innerHTML = `
+                <div class="grid grid-cols-2 gap-4">
+                    <div><strong>Request ID:</strong> ${requestId}</div>
+                    <div><strong>Status:</strong> Completed</div>
+                    <div><strong>Client:</strong> Sample Client</div>
+                    <div><strong>Added By:</strong> User</div>
+                    <div><strong>Created:</strong> 2024-01-01</div>
+                    <div><strong>Execution Time:</strong> 2.5s</div>
+                </div>
+            `;
+            document.getElementById('viewModal').classList.remove('hidden');
+        }
+
+        function closeViewModal() {
+            document.getElementById('viewModal').classList.add('hidden');
+        }
+
+        // Upload Modal Functions
+        function openUploadModal(requestId) {
+            currentRequestId = requestId;
+            document.getElementById('uploadModal').classList.remove('hidden');
+        }
+
+        function closeUploadModal() {
+            document.getElementById('uploadModal').classList.add('hidden');
+            document.getElementById('ftpPath').value = '';
+            document.getElementById('ftpSelect').value = 'green-zxds';
+            document.querySelector('input[name="headerType"][value="standard"]').checked = true;
+            document.getElementById('customColumns').classList.add('hidden');
+        }
+
+        function submitUpload() {
+            const ftp = document.getElementById('ftpSelect').value;
+            const path = document.getElementById('ftpPath').value;
+            const headerType = document.querySelector('input[name="headerType"]:checked').value;
+            
+            if (!path) {
+                alert('Please enter FTP path');
+                return;
+            }
+            
+            // TODO: Implement API call
+            console.log('Uploading for request', currentRequestId, 'to', ftp, 'path:', path, 'header:', headerType);
+            alert('Upload request submitted');
+            closeUploadModal();
+        }
+
+        // Other Button Functions
+        function confirmCancel(requestId) {
+            if (confirm('Are you sure you want to cancel/kill this request?')) {
+                // TODO: Implement API call
+                console.log('Cancelling request:', requestId);
+                alert('Request cancelled');
+            }
+        }
+
+        function downloadExcel(requestId) {
+            // TODO: Implement download logic
+            console.log('Downloading excel for request:', requestId);
+            alert('Download started for request: ' + requestId);
+        }
+
+        function validateRequest(requestId) {
+            // TODO: Implement validation logic
+            console.log('Validating request:', requestId);
+            alert('Validation completed for request: ' + requestId);
+        }
+
+        function adpRequest(requestId) {
+            // TODO: Implement ADP logic
+            console.log('ADP request:', requestId);
+            alert('ADP request submitted for: ' + requestId);
+        }
+
+        // Custom header type change handler
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('input[name="headerType"]').forEach(function(radio) {
+                radio.addEventListener('change', function() {
+                    const customColumns = document.getElementById('customColumns');
+                    if (this.value === 'custom') {
+                        customColumns.classList.remove('hidden');
+                    } else {
+                        customColumns.classList.add('hidden');
+                    }
+                });
+            });
+        });
+        </script>
+        
+    
+</body>
+</html>

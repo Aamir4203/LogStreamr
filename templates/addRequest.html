@@ -1,0 +1,747 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+
+        <link href="{{ url_for('static', filename='output.css') }}" rel="stylesheet">
+
+    <title>LogStreamR</title>
+<style>
+
+    /* Custom styles for Select2 to match Tailwind CSS */
+    .select2-container .select2-selection--single {
+        height: 36px;
+        border: 1px solid #d1d5db;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 36px;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 36px;
+        color: #4a5568; /* gray-700 */
+    }
+
+    .select2-dropdown {
+        border-radius: 0.25rem; /* rounded-md */
+        border-color: #e2e8f0; /* gray-200 */
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    }
+
+#toggleInput {
+        display: none;
+    }
+@media (min-width: 768px){
+  .main.active{
+    margin-left: 0px;
+    width: 100%;
+  }
+}
+
+.-translate-x-full {
+    --tw-translate-x: -100%;
+    transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+
+.select2-selection__clear{
+        margin-right:15px;
+}
+
+</style>
+</head>
+<body class="text-gray-800 font-inter">
+
+      <!--sidenav -->
+    <div class="fixed left-0 top-0 w-60 h-full bg-white p-4 pt-2 z-50 sidebar-menu transition-transform ">
+        <a href="apt-tool.html" class="flex flex-col items-center pb-3 border-b border-b-gray-800 px-5">
+                        <img src="{{ url_for('static', filename='images/aptroid.png') }}" class="" alt="Aptroid Logo">
+            <!-- <h2 class="font-bold text-base">Attribution Processing </h2> -->
+            <!-- <h2 class="font-bold text-base bg-[#f84525] text-white w-full text-center">Tool</h2> -->
+        </a>
+        <ul class="mt-4">
+            <!-- <span class="text-gray-400 font-bold">ADMIN</span> -->
+            <li class="mb-1 group">
+                <a href="apt-tool.html" class="flex font-semibold items-center py-2 px-4 text-[#545454] hover:bg-[#004764] hover:text-gray-100 rounded-md group-[.active]:bg-gray-800 group-[.active]:text-white group-[.selected]:bg-[#004764] group-[.selected]:text-gray-100">
+                    <i class="ri-home-2-fill mr-3 text-lg text-[#004764]"></i>
+                    <span class="text-sm">Dashboard</span>
+                </a>
+            </li>
+                        <li class="mb-1 group">
+                <a href="addRequest.html" class="flex font-semibold items-center py-2 px-4 text-[#545454] hover:bg-[#004764] hover:text-gray-100 rounded-md group-[.active]:bg-gray-800 group-[.active]:text-white group-[.selected]:bg-[#004764] group-[.selected]:text-gray-100">
+
+                                        <i class="ri-add-circle-fill mr-3 text-lg text-[#004764]"></i>
+                    <span class="text-sm">Add Request</span>
+                </a>
+            </li>
+            <li class="mb-1 group">
+                <a href="" class="flex font-semibold items-center py-2 px-4 text-[#545454] hover:bg-[#004764] hover:text-gray-100 rounded-md group-[.active]:bg-gray-800 group-[.active]:text-white group-[.selected]:bg-[#004764] group-[.selected]:text-gray-100 sidebar-dropdown-toggle">
+                                        <i class="ri-draft-fill mr-3 text-lg text-[#004764]"></i>
+                    <span class="text-sm">Reports</span>
+                    <i class="ri-arrow-right-s-line ml-auto group-[.selected]:rotate-90"></i>
+                </a>
+                <ul class="pl-7 mt-2 hidden group-[.selected]:block">
+                    <li class="mb-4">
+                        <a href="request.html" class="text-[#545454] text-sm flex items-center hover:text-[#7b9f2d] before:contents-[''] before:w-1 before:h-1 before:rounded-full before:bg-gray-300 before:mr-3">Request</a>
+                    </li>
+                    <li class="mb-4">
+                        <a href="logs.html" class="text-[#545454] text-sm flex items-center hover:text-[#7b9f2d] before:contents-[''] before:w-1 before:h-1 before:rounded-full before:bg-gray-300 before:mr-3">Logs</a>
+                    </li>
+                </ul>
+            </li>
+
+
+        </ul>
+    </div>
+    <div class="fixed top-0 left-0 w-full h-full bg-black/50 z-40 md:hidden sidebar-overlay"></div>
+    <!-- end sidenav -->
+
+    <main class="w-full md:w-[calc(100%-240px)] md:ml-60 bg-gray-200 min-h-screen transition-all main">
+        <!-- navbar -->
+        <div class="py-2 px-6 bg-white flex items-center shadow-md shadow-black/5 sticky top-0 left-0 z-30">
+            <button type="button" class="text-lg text-[#545454] font-semibold sidebar-toggle">
+                <i class="ri-menu-line"></i>
+            </button>
+
+                        <h2 class="font-bold uppercase ml-3 text-xl tracking-wider">LogStreamR</h2>
+
+            <ul class="ml-auto flex items-center">
+                <li class="mr-1 dropdown">
+                    <button type="button" class="dropdown-toggle text-gray-400 mr-4 w-8 h-8 rounded flex items-center justify-center  hover:text-gray-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" class="hover:bg-gray-100 rounded-full" viewBox="0 0 24 24" style="fill: gray;transform:msFilter;"><path d="M19.023 16.977a35.13 35.13 0 0 1-1.367-1.384c-.372-.378-.596-.653-.596-.653l-2.8-1.337A6.962 6.962 0 0 0 16 9c0-3.859-3.14-7-7-7S2 5.141 2 9s3.14 7 7 7c1.763 0 3.37-.66 4.603-1.739l1.337 2.8s.275.224.653.596c.387.363.896.854 1.384 1.367l1.358 1.392.604.646 2.121-2.121-.646-.604c-.379-.372-.885-.866-1.391-1.36zM9 14c-2.757 0-5-2.243-5-5s2.243-5 5-5 5 2.243 5 5-2.243 5-5 5z"></path></svg>
+                    </button>
+                    <div class="dropdown-menu shadow-md shadow-black/5 z-30 hidden max-w-xs w-full bg-white rounded-md border border-gray-100">
+                        <form action="" class="p-4 border-b border-b-gray-100">
+                            <div class="relative w-full">
+                                <input type="text" class="py-2 pr-4 pl-10 bg-gray-50 w-full outline-none border border-gray-100 rounded-md text-sm focus:border-blue-500" placeholder="Search...">
+                                <i class="ri-search-line absolute top-1/2 left-4 -translate-y-1/2 text-[#545454]"></i>
+                            </div>
+                        </form>
+                    </div>
+                </li>
+
+                <button id="fullscreen-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" class="hover:bg-gray-100 rounded-full" viewBox="0 0 24 24" style="fill: gray;transform:msFilter;"><path d="M5 5h5V3H3v7h2zm5 14H5v-5H3v7h7zm11-5h-2v5h-5v2h7zm-2-4h2V3h-7v2h5z"></path></svg>
+
+
+                <li class="dropdown ml-3">
+                    <button type="button" class="dropdown-toggle flex items-center">
+                        <div class="flex-shrink-0 w-10 h-10 relative">
+                            <div class="p-1 bg-white rounded-full focus:outline-none focus:ring">
+                                <img class="w-8 h-8 rounded-full" src="{{ url_for('static', filename='images/user-icon.png') }}" alt="User Icon"/>
+                                <div class="top-0 left-7 absolute w-3 h-3 bg-lime-400 border-2 border-white rounded-full animate-ping"></div>
+                                <div class="top-0 left-7 absolute w-3 h-3 bg-lime-500 border-2 border-white rounded-full"></div>
+                            </div>
+                        </div>
+                        <div class="p-2 md:block text-left">
+                            <h2 class="text-sm font-semibold text-gray-800">Aamir</h2>
+                            <p class="text-xs text-gray-500">Admin</p>
+                        </div>
+                    </button>
+                    <ul class="dropdown-menu shadow-md shadow-black/5 z-30 hidden py-1.5 rounded-md bg-white border border-gray-100 w-full max-w-[140px]">
+                        <!-- <li> -->
+                            <!-- <a href="#" class="flex items-center text-[13px] py-1.5 px-4 text-gray-600 hover:text-[#f84525] hover:bg-gray-50">Profile</a> -->
+                        <!-- </li> -->
+                        <!-- <li> -->
+                            <!-- <a href="#" class="flex items-center text-[13px] py-1.5 px-4 text-gray-600 hover:text-[#f84525] hover:bg-gray-50">Settings</a> -->
+                        <!-- </li> -->
+                        <li>
+                            <form method="POST" action="">
+                                <a role="menuitem" class="flex items-center text-[13px] py-1.5 px-4 text-gray-600 hover:text-[#f84525] hover:bg-gray-50 cursor-pointer"
+                                    onclick="event.preventDefault();
+                                    this.closest('form').submit();">
+                                    Log Out
+                                </a>
+                            </form>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <!-- end navbar -->
+
+      <!-- Content -->
+
+        <div class="px-6" style="padding-top: 1.5rem;">
+                <div class="grid grid-cols-1 gap-6 mb-6">
+                        <div class="bg-white rounded-md border border-gray-100 p-6 shadow-md shadow-black/5">
+
+
+                                <!-- component -->
+<section class="container px-4 mx-auto">
+    <div class="flex flex-col">
+        <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+            <div class="inline-block min-w-full p-2 align-middle">
+                <div class="">
+
+                        <form class="" action="/submit_form" id="myForm" method="post" >
+                        <div class="grid grid-cols-3 gap-4 ">
+
+                            <div class="flex flex-wrap rounded dark:bg-gray-600">
+
+
+                                <div class="flex flex-col gap-1 w-full border-gray-400">
+
+                                    <div class="pb-1 ">
+
+
+                                                                        <label for="clientName"  class="text-sm text-gray-600 dark:text-gray-400">Client Name </label>
+
+                                                                        <div class="flex flex-row gap-2 pb-1">
+                                                                                        <!-- <select name="clientName" id="clientName" style="width: 100%" class="w-full h-9 px-1 border border-slate-200 rounded focus:outline-none focus:border-slate-500 hover:shadow dark:bg-gray-600 dark:text-gray-100 text-gray-700"> -->
+                                                                                        <!-- <option value="">-- select --</option> -->
+
+                                                                                        <!-- <option value="Mmgy_lvcb">Mmgy_lvcb</option> -->
+
+                                                                                        <!-- <option value="Okl">Okl</option> -->
+
+                                                                                        <!-- <option value="Luxury_card">Luxury_card</option> -->
+
+                                                                                        <!-- <option value="H_r_block">H_r_block</option> -->
+
+                                                                                        <!-- <option value="Tmobile_core">Tmobile_core</option> -->
+
+                                                                                        <!-- </select> -->
+                                                                                        <select name="clientName" id="clientName" style="width: 100%" class="w-full h-9 px-1 border border-slate-200 rounded focus:outline-none focus:border-slate-500 hover:shadow dark:bg-gray-600 dark:text-gray-100 text-gray-700">
+                                                                        <option value="">-- select --</option>
+                                                                        {% for client_name in client_names %}
+                                                                        <option value="{{ client_name[0] }}">{{ client_name[0] }}</option>
+                                                                                                {% endfor %}
+                                                                                        </select>
+                                                                                        <button id="addClient" type="button" class="inline rounded border border-[#7B9F2D] font-medium h-9 hover:bg-[#7B9F2D] text-[#7B9F2D]  hover:text-white focus:outline-none text-center px-2">
+                                            <i class="ri-add-circle-fill text-2xl "></i>
+                                                                                        </button>
+                                                                        </div>
+
+                                                                        </div>
+
+
+                                                                        <div class="pb-1 ">
+                                                                                <label for="deliveryDateRange" class="text-sm text-gray-600 dark:text-gray-400">Delivered Date Range</label>
+                                                                         <div class="flex flex-row gap-2 ">
+                                                                                <input
+                                                                                        class="w-full h-9 border border-slate-200 rounded focus:outline-none focus:border-slate-500 hover:shadow dark:bg-gray-600 dark:text-gray-100 px-2"
+                                                                                        type="text" name="startDate" placeholder="Start Date">
+
+                                                                                        <input
+                                                                                                class="w-full h-9 border border-slate-200 px-2 rounded focus:outline-none focus:border-slate-500 hover:shadow dark:bg-gray-600 dark:text-gray-100"
+                                                                                                type="text" name="endDate" placeholder="End Date">
+                                                                         </div>
+                                                                         </div>
+
+
+
+                                                                        <div class="pb-1 ">
+
+                                                                                 <div class="flex flex-row gap-2">
+                                                                                        <div>
+
+                                                                                 <label for="residualDate" class="text-sm text-gray-600 dark:text-gray-400">Residual Date</label>
+                                                                                        <input
+                                                                                                class="w-full h-9 border border-slate-200 rounded focus:outline-none focus:border-slate-500 hover:shadow dark:bg-gray-600 dark:text-gray-100 px-2"
+                                                                                                type="text" name="residualStart" placeholder="Residual Date">
+                                                                                                </div>
+
+                                                                                <div>
+                                                                                        <label class="text-sm text-gray-600 dark:text-gray-400">Week </label>
+                                                                                <input
+                                                                                        class="w-full h-9 border border-slate-200 px-2 rounded focus:outline-none focus:border-slate-500 hover:shadow dark:bg-gray-600 dark:text-gray-100"
+                                                                                        type="text" name="week" placeholder="WeekNo.">
+                                                                                </div>
+                                                                                </div>
+
+
+                                                                        </div>
+
+
+
+                                    </div>
+                                    </div>
+
+                                    <div class="flex flex-col gap-1">
+
+
+
+                                        <div class="pb-1">
+                                            <label for="addedBy" class="text-sm text-gray-600 dark:text-gray-400">Added By</label>
+                                                                                        <select name="addedBy" id="addedBy" class="w-full h-9 px-1 border border-slate-200 rounded focus:outline-none focus:border-slate-500 hover:shadow dark:bg-gray-600 dark:text-gray-100 text-gray-700">
+                                                                                                <option value="">-- select --</option>
+                                                                                                        {% for added_by in added_by %}
+                                                                                                <option value="{{ added_by[0] }}">{{ added_by[0] }}</option>
+                                                                                                {% endfor %}
+                                                                                        </select>
+                                        </div>
+                                                                                  <div class="pb-1">
+                                            <label class="text-sm text-gray-600 dark:text-gray-400">Required Old%  </label><br>
+                                            <input oninput="validatePercentage()" type="number" id="percentageInput" name="percentageInput" min="1" max="100" value="1" class="w-full h-9 px-2 border border-slate-200 rounded focus:outline-none focus:border-slate-500 hover:shadow dark:bg-gray-600 dark:text-gray-100">
+                                        </div>
+
+
+
+                                                                                <div class="flex flex-row flex-wrap justify-between w-full border-gray-400">
+
+
+                                    <div class="pb-1">
+                                       <label for="fileTypeRadio" class="text-sm text-gray-600 dark:text-gray-400">Add TimeStamp</label>
+                                       <div for="addTimeStamp" class="flex cursor-pointer items-start gap-1 mt-2">
+                                           <div class="flex items-center">
+                                             &#8203;
+                                             <input type="checkbox" class="size-4 rounded border-gray-300" name="addTimeStamp" value="Y"/>
+                                           </div>
+
+                                           <div>
+                                             <label for="addTimeStamp" class="font-normal dark:bg-gray-600 dark:text-gray-100">Add TimeStamp </label>
+                                           </div>
+                                       </div>
+                                    </div>
+
+                                    <div class="w-px h-12 bg-gray-800 border mt-2"></div>
+
+                                    <div class="pb-1">
+                                       <label for="addIpsLogs" class="text-sm text-gray-600 dark:text-gray-400">Add IPs to Logs</label>
+                                       <div for="Option2" class="flex cursor-pointer items-start gap-1  mt-2" >
+                                           <div class="flex items-center">
+                                             &#8203;
+                                             <input type="checkbox" class="size-4 rounded border-gray-300" id="addIpsLogs" name="addIpsLogs" value="Y"/>
+                                           </div>
+
+                                           <div>
+                                               <label for="addIpsLogs" class="font-normal dark:bg-gray-600 dark:text-gray-100">Add IPs to Logs </label>
+                                           </div>
+                                       </div>
+                                    </div>
+                                   </div>
+
+
+
+                                    </div>
+
+
+
+
+
+                                <div class="flex flex-col gap-1">
+
+                                                                         <div class="pb-1 ">
+                                            <label for="requestType" class="text-sm text-gray-600 dark:text-gray-400">Request Type</label>
+
+                                            <select onchange="showInput(this.value)" name="requestType" id="requestType" class="w-full h-9 px-1 border border-slate-200 rounded focus:outline-none focus:border-slate-500 hover:shadow dark:bg-gray-600 dark:text-gray-100 text-gray-700">
+                                                <option value="">-- select --</option>
+                                                <option value="1">Type1 - Unique/NonUnique</option>
+                                                <option value="2">Type2 - Frequency Wise</option>
+                                            </select>
+                                        </div>
+
+
+                                                                         <div id="filePathTextArea" class="pb-1 hidden" >
+                                                                                <label for="filePath"  class="text-sm text-gray-600 dark:text-gray-400">Type-2 File Path</label>
+                                                                                <input
+                                                                                class="w-full h-9 border border-slate-200 rounded focus:outline-none focus:border-slate-500 hover:shadow dark:bg-gray-600 dark:text-gray-100"
+                                                                                type="text" id="filePath" name="filePath">
+                                                                        </div>
+
+                                   <div class="pb-1">
+                                     <label class="text-sm text-gray-600 dark:text-gray-400">Report Path </label>
+                                     <input
+                                         class="w-full h-9 border border-slate-200 px-2 rounded focus:outline-none focus:border-slate-500 hover:shadow dark:bg-gray-600 dark:text-gray-100"
+                                         type="text" name="reportpath">
+                                  </div>
+
+                                  <div class="pb-1">
+                                     <label class="text-sm text-gray-600 dark:text-gray-400">Quality Score Report Path</label>
+                                     <input
+                                         class="w-full h-9 border border-slate-200 px-2 rounded focus:outline-none focus:border-slate-500 hover:shadow dark:bg-gray-600 dark:text-gray-100"
+                                         type="text" name="qspath">
+                                  </div>
+
+                                </div>
+
+
+
+                                </div>
+                            </div>
+
+
+                            <div class=" dark:bg-gray-600 py-3">
+                              <div class="rounded p-2 border relative">
+                                <h2 class="text-sm font-medium text-gray-600 dark:text-gray-300 bg-white px-1 absolute -top-3 z-10">File settings:</h2>
+
+                                <div class="flex flex-row flex-wrap justify-between gap-1 w-full border-gray-400 p-1">
+
+                                 <div class="pb-1">
+                                    <label for="fileTypeRadio" class="text-sm text-gray-600 dark:text-gray-400">File Type </label>
+                                    <div class="flex flex-row gap-4 mt-2">
+                                        <div class="flex items-center">
+                                            <input id="option1" type="radio" name="options" value="Y" class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                                            <label for="fileTypeRadio" class="ml-2 text-sm font-medium dark:bg-gray-600 dark:text-gray-100 ">Sent</label>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <input id="option2" type="radio" name="options" value="N" checked class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                                            <label for="fileTypeRadio" class="ml-2 text-sm font-medium dark:bg-gray-600 dark:text-gray-100 ">Delivered</label>
+                                        </div>
+                                    </div>
+                                 </div>
+
+                                 <div class="w-px h-12 bg-gray-800 border mt-2"></div>
+
+                                 <div class="pb-1">
+                                    <label for="fileTypeRadio" class="text-sm text-gray-600 dark:text-gray-400">Offer Suppression </label>
+                                    <div for="Option1" class="flex cursor-pointer items-start gap-2  mt-2">
+                                        <div class="flex items-center">
+                                          &#8203;
+                                          <input type="checkbox" class="size-4 rounded border-gray-300" name="Offer_option" value="Y" />
+                                        </div>
+
+                                        <div>
+                                          <label for="Option1" class="font-normal dark:bg-gray-600 dark:text-gray-100">Offer Suppression </label>
+                                        </div>
+                                    </div>
+                                 </div>
+
+                                 <div class="w-px h-12 bg-gray-800 border mt-2"></div>
+
+                                 <div class="pb-1">
+                                    <label for="fileTypeRadio" class="text-sm text-gray-600 dark:text-gray-400">Add Bounce</label>
+                                    <div for="Option2" class="flex cursor-pointer items-start gap-2  mt-2" >
+                                        <div class="flex items-center">
+                                          &#8203;
+                                          <input type="checkbox" class="size-4 rounded border-gray-300" name="bounce_option" value="Y"/>
+                                        </div>
+
+                                        <div>
+                                            <label for="Option2" class="font-normal dark:bg-gray-600 dark:text-gray-100">Add Bounce </label>
+                                        </div>
+                                    </div>
+                                 </div>
+
+                                 <div class="pb-1">
+                                    <label for="fileTypeRadio" class="text-sm text-gray-600 dark:text-gray-400">Client Suppression</label>
+                                    <div for="Option3" class="flex cursor-pointer items-start gap-2  mt-2" >
+                                        <div class="flex items-center">
+                                          &#8203;
+                                          <input type="checkbox" class="size-4 rounded border-gray-300" id="Option3" value="Y" />
+                                        </div>
+
+                                        <div class="flex flex-row align-center gap-4">
+                                          <label for="Option3" class="font-normal dark:bg-gray-600 dark:text-gray-100 whitespace-nowrap">Client Suppression </label>
+
+                                          <input id="toggleInput"
+                                          class="w-full h-9 border border-slate-200 px-2 rounded focus:outline-none focus:border-slate-500 hover:shadow dark:bg-gray-600 dark:text-gray-100 -mt-3"
+                                          type="text" name="cs_option">
+                                        </div>
+                                    </div>
+                                 </div>
+
+                                </div>
+                                </div>
+
+                                <div class="rounded p-2 border relative mt-5">
+                                    <h2 class="text-sm font-medium text-gray-600 dark:text-gray-300 bg-white px-1 absolute -top-3 z-10">Input Query:</h2>
+                                     <div class="pb-1">
+                                        <textarea id="OrderNotes" class="w-full resize-none border-none align-top focus:ring-0 sm:text-sm" rows="6" name="input_query" placeholder=" --select * from table-- "></textarea>
+                                     </div>
+                                </div>
+                            </div>
+
+
+                            </div>
+
+                            <div class="flex flex-row justify-center gap-4 mt-2">
+                            <button
+                                class="border border-[#7b9f2d] text-[#7b9f2d] font-bold py-2 px-8 rounded hover:bg-[#7b9f2d] hover:text-white uppercase"
+                                type="submit" onclick="submitForm()">Submit</button>
+
+                                <button
+                                class="border border-red-600 font-bold py-2 px-8 rounded uppercase text-red-600 hover:bg-red-600 hover:text-white"
+                                type="reset">Clear</button>
+
+                            </div>
+
+
+
+                        </form>
+
+
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</section>
+                        </div>
+                </div>
+    </div>
+      <!-- End Content -->
+
+
+     <!-- Modal Start-->
+     <div id="addClientModal" class="fixed z-10 inset-0 overflow-y-auto hidden">
+        <div class="flex items-center justify-center min-h-screen ">
+            <div class="bg-white w-1/4 rounded shadow-md border">
+
+
+
+                <div class="flex justify-between bg-[#004764] p-3 rounded-sm">
+                    <label for="name" class="block text-white text-sm font-bold">Add Client-Name</label>
+                    <button id="closeAddClient" class="text-white hover:text-red-500">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                <form class="p-3 mt-1" action="/submit_form" method="POST">
+                        <input type="text" id="name" name="name"
+                               class="w-full p-2 border rounded-md focus:outline-none focus:border-blue-500">
+
+                    <div class="mt-3 text-center">
+                    <button id="submitClient" type="button" class="border border-[#7b9f2d] text-[#7b9f2d] font-bold py-2 px-4 rounded hover:bg-[#7b9f2d] hover:text-white">
+                       Submit
+                    </button>
+
+                    </div>
+                </form>
+                <div id="loading" style="display: none;">
+                        <p>Loading...</p>
+                        <div class="spinner"></div> <!-- Add your spinner here -->
+                </div>
+
+            </div>
+        </div>
+    </div>
+     <!-- Modal End-->
+
+    </main>
+
+
+
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+    <script>
+        function showInput(value) {
+            var filePathTextArea = document.getElementById("filePathTextArea");
+            if (value === "2") {
+                filePathTextArea.style.display = "block";
+            } else {
+                filePathTextArea.style.display = "none";
+            }
+        }
+
+        // Initialize with the default value
+        document.getElementById("requestType").value = "1";
+        showInput("1");
+    </script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Initialize Flatpickr for Delivered Date Range
+        let startDatePicker = flatpickr("input[name='startDate']", {
+            enableTime: false,
+            dateFormat: "Y-m-d",
+            onChange: function (selectedDates, dateStr, instance) {
+                endDatePicker.set("minDate", dateStr); // Ensure End Date cannot be before Start Date
+            }
+        });
+
+        let endDatePicker = flatpickr("input[name='endDate']", {
+            enableTime: false,
+            dateFormat: "Y-m-d",
+            onChange: function (selectedDates, dateStr, instance) {
+                let startDate = document.querySelector("input[name='startDate']").value;
+                if (startDate && dateStr < startDate) {
+                    alert("⚠ End Date must be greater than Start Date!");
+                    document.querySelector("input[name='endDate']").value = ""; // Reset input instead of looping
+                }
+            }
+        });
+
+        // Initialize Flatpickr for Residual Date
+        let residualDatePicker = flatpickr("input[name='residualStart']", {
+            enableTime: false,
+            dateFormat: "Y-m-d",
+            onChange: function (selectedDates, dateStr, instance) {
+                let endDate = document.querySelector("input[name='endDate']").value;
+                if (endDate && dateStr < endDate) {
+                    alert("⚠ Residual Date must be equal to or greater than End Date!");
+                    document.querySelector("input[name='residualStart']").value = ""; // Reset input
+                }
+            }
+        });
+    });
+</script>
+
+
+        <script>
+            document.getElementById('Option3').addEventListener('change', function() {
+                var input = document.getElementById("toggleInput");
+                input.style.display = this.checked ? 'block' : 'none';
+            });
+        </script>
+        <script>
+            function validatePercentage() {
+                var input = document.getElementById('percentageInput');
+                if (input.value > 100) {
+                    input.value = 100;
+                } else if (input.value < 0) {
+                    input.value = 1;
+                }
+            }
+        </script>
+        <script>
+            $(document).ready(function() {
+
+
+                $("#clientName").select2({
+                    placeholder: "-- select --",
+                    allowClear: true
+                });
+
+
+            });
+            </script>
+
+	    <script>
+function showSuccessMessage() {
+    let successModal = document.createElement("div");
+    successModal.innerHTML = `
+        <div style="
+            position: fixed;
+            top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: white; padding: 20px; border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-align: center; z-index: 1000;">
+            <h3 style="color: green;">✔ Request Added Successfully!</h3>
+            <button onclick="this.parentElement.remove();"
+                style="background: #4CAF50; color: white;
+                border: none; padding: 10px 20px;
+                margin-top: 10px; cursor: pointer; border-radius: 5px;">
+                OK
+            </button>
+        </div>
+    `;
+    document.body.appendChild(successModal);
+}
+
+document.getElementById('myForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    let formData = new FormData(this);
+
+    fetch('/submit_form', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showSuccessMessage(); // ✅ Call the custom success modal
+            document.getElementById("myForm").reset();
+        } else {
+            alert("❌ Error: " + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Fetch Error:', error);
+        alert("❌ Network or Server Error.");
+    });
+});
+</script>
+
+
+
+<script>
+document.getElementById('submitClient').addEventListener('click', function() {
+    // Show loading spinner
+    document.getElementById("loading").style.display = "block";
+
+    var clientName = document.getElementById('name').value;
+
+    if (!clientName) {
+        alert("Please enter a client name.");
+        // Hide loading spinner if no client name
+        document.getElementById("loading").style.display = "none";
+        return;
+    }
+
+    // Check if client exists
+    fetch('/check_client', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ client_name: clientName }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Hide loading spinner before the next fetch
+        document.getElementById("loading").style.display = "none";
+
+        if (data.exists) {
+            alert("Client ID exists: " + data.client_id);
+        } else {
+            // Show loading spinner again for the next request
+            document.getElementById("loading").style.display = "block";
+
+            // Call the shell script to add the client
+            fetch('/add_client', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ client_name: clientName }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Hide loading spinner
+                document.getElementById("loading").style.display = "none";
+
+                if (data.success) {
+                    alert("Client added with ID: " + data.client_id);
+                } else {
+                    alert("Failed to add client.");
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                // Hide loading spinner on error
+                document.getElementById("loading").style.display = "none";
+                alert("An error occurred. Please try again.");
+            });
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        // Hide loading spinner on error
+        document.getElementById("loading").style.display = "none";
+        alert("An error occurred. Please try again.");
+    });
+});
+</script>
+
+</body>
+</html>
+
