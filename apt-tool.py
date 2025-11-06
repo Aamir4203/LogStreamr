@@ -88,7 +88,7 @@ def submit_form():
 @app.route('/request.html')
 def request_logs():
     cursor = conn.cursor()
-    cursor.execute("select a.REQUEST_ID,CLIENT_NAME,ADDED_BY,RLTP_FILE_COUNT,REQUEST_STATUS,REQUEST_DESC,EXECUTION_TIME from apt_custom_postback_request_details_dnd a join apt_custom_client_info_table_dnd b on a.CLIENT_ID=b.CLIENT_ID  join apt_custom_postback_qa_table_dnd c on a.REQUEST_ID=c.REQUEST_ID  order by a.REQUEST_ID desc limit 50;")
+    cursor.execute("select a.REQUEST_ID,CLIENT_NAME,ADDED_BY,RLTP_FILE_COUNT,REQUEST_STATUS,REQUEST_DESC,EXECUTION_TIME,a.ERROR_CODE from apt_custom_postback_request_details_dnd a join apt_custom_client_info_table_dnd b on a.CLIENT_ID=b.CLIENT_ID  join apt_custom_postback_qa_table_dnd c on a.REQUEST_ID=c.REQUEST_ID  order by a.REQUEST_ID desc limit 50;")
     logs = cursor.fetchall()
     cursor.close()
     return render_template('request.html', logs=logs)
@@ -124,6 +124,38 @@ def add_client():
             return jsonify({"success": True, "client_id": client_row[0]})
     return jsonify({"success": False})
     
+@app.route('/rerun', methods=['POST'])
+def rerun():
+    data = request.get_json()
+    request_id = int(data.get('request_id'))
+    error_code = int(data.get('module'))
+    
+    module_map= { 1: "trt", 2: "logs", 3: "suppression", 4: "source", 5: "report", 6: "timestamps", 7: "ip" }
+    module = module_map.get(error_code)
+    cursor = conn.cursor()
+    
+    try:
+        cursor.execute("SELECT REQUEST_STATUS FROM APT_CUSTOM_POSTBACK_REQUEST_DETAILS_DND WHERE REQUEST_STATUS in ('C','E') and REQUEST_ID = %s ", (request_id,))
+        request_status = cursor.fetchone()[0]
+        
+        if request_status:            
+            cursor.execute("UPDATE APT_CUSTOM_POSTBACK_REQUEST_DETAILS_DND_TEST SET REQUEST_STATUS=(CASE WHEN REQUEST_STATUS='C' THEN 'RW' ELSE 'RE' END),REQUEST_VALIDATION=NULL,ERROR_CODE=%s WHERE REQUEST_ID = %s ", (error_code,request_id,))
+            conn.commit()
+            logging.info(f"ReRun requested for request_id: {request_id} module: {module}")
+        else:
+             logging.warning(f'RequestId not found: {request_id}')
+             return jsonify({"success": False, "message": "RequestId not found"}), 404         
+
+        result = subprocess.run(['sh', '-x','./scripts/requestPicker.sh'], capture_output=True, text=True)
+        if result.returncode == 0:
+            return jsonify({"success": True, "message": f"ReRunning request {request_id} with module: {module}"}), 200
+        return jsonify({"success": False, "message": "Script execution failed"}), 500    
+    except Exception as e:
+            logging.error(f'Error during database operation: {e}')
+            return jsonify({"success": False, "message": str(e)}), 500
+    finally:
+         cursor.close()
+
 if __name__ == "__main__":
     app.run(debug=True,host='127.0.0.1',port=5000)
 
