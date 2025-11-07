@@ -93,7 +93,18 @@ def request_logs():
     cursor.close()
     return render_template('request.html', logs=logs)
 
-
+@app.route('/view_stats',methods=['POST'])
+def view_stats():
+    data = request.get_json()
+    id = data.get('id')
+    cursor = conn.cursor()
+    cursor.execute(f"select a.REQUEST_ID,CLIENT_NAME,ADDED_BY,RLTP_FILE_COUNT,REQUEST_STATUS,REQUEST_DESC,REQUEST_START_TIME,execution_time EXECUTION_TIME,POSTED_UNSUB_HARDS_SUPP_COUNT,OFFERID_UNSUB_SUPP_COUNT OFFERID_SUPPRESSED_COUNT,SUPPRESSION_COUNT CLIENT_SUPPRESSION_COUNT,MAX_TOUCH_COUNT,LAST_WK_DEL_INSERT_CNT,LAST_WK_UNSUB_INSERT_CNT,UNIQUE_DELIVERED_COUNT,TOTALDELIVEREDCOUNT,NEW_RECORD_CNT,NEW_ADDED_IP_CNT,total_running_uniq_cnt from apt_custom_postback_request_details_dnd a join apt_custom_client_info_table_dnd b on a.CLIENT_ID=b.CLIENT_ID  join apt_custom_postback_qa_table_dnd c on a.REQUEST_ID=c.REQUEST_ID  where a.REQUEST_ID={id}")
+    stats = cursor.fetchall()
+    cursor.close()
+    if stats:
+        return jsonify({"exists":True,"stats":stats})
+    else:
+        return jsonify({"exists":False})
 
 
 @app.route('/check_client', methods=['POST'])
