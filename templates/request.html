@@ -232,9 +232,11 @@
                         
                         <!-- Cancel/Kill Button -->
                         <td class="text-center">
+                            {% if log[4] in ['R'] %}
                             <button onclick="confirmCancel('{{ log[0] }}')" class="bg-red-500 text-white px-2 py-1 text-xs rounded hover:bg-red-600" title="Cancel/Kill">
                                 <i class="ri-close-line"></i>
                             </button>
+                            {% endif %}
                         </td>
                         
                         <!-- View Button - only for completed -->
@@ -266,16 +268,20 @@
                         
                         <!-- Validate Button -->
                         <td class="text-center">
+                            {% if log[4] == 'C' %}
                             <button onclick="validateRequest('{{ log[0] }}')" class="bg-yellow-500 text-white px-2 py-1 text-xs rounded hover:bg-yellow-600" title="Validate">
                                 <i class="ri-check-line"></i>
                             </button>
+                            {% endif %}
                         </td>
                         
                         <!-- ADP Button -->
                         <td class="text-center">
+                            {% if log[4] == 'C' %}
                             <button onclick="adpRequest('{{ log[0] }}')" class="bg-indigo-500 text-white px-2 py-1 text-xs rounded hover:bg-indigo-600" title="ADP">
                                 ADP
                             </button>
+                            {% endif %}
                         </td>
                     </tr>
                     {% endfor %}
@@ -346,10 +352,10 @@
  <!-- Modal End-->
 
 <!-- ReRun Modal -->
-<div id="reRunModal" class="fixed z-10 inset-0 overflow-y-auto hidden">
+<div id="reRunModal" class="fixed z-50 inset-0 overflow-y-auto hidden">
     <div class="flex items-center justify-center min-h-screen">
-        <div class="bg-white w-1/3 rounded shadow-md border">
-            <div class="flex justify-between bg-[#004764] p-3 rounded-sm">
+        <div id="draggableReRunModal" class="bg-white w-1/3 rounded shadow-md border absolute">
+            <div id="modalReRunHeader" class="flex justify-between bg-[#004764] p-3 rounded-t cursor-move">
                 <label class="block text-white text-sm font-bold">Select Module to ReRun</label>
                 <button onclick="closeReRunModal()" class="text-white hover:text-red-500">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -378,31 +384,32 @@
 </div>
 
 <!-- View Modal -->
-<div id="viewModal" class="fixed z-10 inset-0 overflow-y-auto hidden">
-    <div class="flex items-center justify-center min-h-screen">
-        <div class="bg-white w-2/3 rounded shadow-md border">
-            <div class="flex justify-between bg-[#004764] p-3 rounded-sm">
-                <label class="block text-white text-sm font-bold">Request Details</label>
-                <button onclick="closeViewModal()" class="text-white hover:text-red-500">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
-            </div>
-            <div class="p-4">
-                <div id="viewContent" class="space-y-2">
-                    <!-- Key-value pairs will be populated here -->
-                </div>
-            </div>
+<div id="viewModal" class="fixed inset-0 bg-black/40 z-50 overflow-y-auto hidden">
+  <div class="flex items-center justify-center min-h-screen">
+    <div id="draggableViewModal" class="bg-white w-1/3 rounded shadow-md border absolute">
+      <div id="modalViewHeader" class="flex justify-between bg-[#004764] p-3 rounded-t cursor-move">
+        <label class="block text-white text-sm font-bold">Request Details</label>
+        <button onclick="closeViewModal()" class="text-white hover:text-red-500">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                  d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <div class="p-4">
+        <div id="viewContent" class="space-y-2">
+          <!-- Key-value pairs will be populated here -->
         </div>
+      </div>
     </div>
+  </div>
 </div>
 
 <!-- Upload Modal -->
-<div id="uploadModal" class="fixed z-10 inset-0 overflow-y-auto hidden">
+<div id="uploadModal" class="fixed z-50 inset-0 overflow-y-auto hidden">
     <div class="flex items-center justify-center min-h-screen">
-        <div class="bg-white w-1/2 rounded shadow-md border">
-            <div class="flex justify-between bg-[#004764] p-3 rounded-sm">
+        <div id="draggableUploadModal" class="bg-white w-1/2 rounded shadow-md border absolute">
+            <div id="modalUploadHeader" class="flex justify-between bg-[#004764] p-3 rounded-sm">
                 <label class="block text-white text-sm font-bold">File Upload Configuration</label>
                 <button onclick="closeUploadModal()" class="text-white hover:text-red-500">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -596,18 +603,136 @@
         // View Modal Functions
         function openViewModal(requestId) {
             currentRequestId = requestId;
-            // TODO: Fetch request details from API
-            const viewContent = document.getElementById('viewContent');
-            viewContent.innerHTML = `
-                <div class="grid grid-cols-2 gap-4">
-                    <div><strong>Request ID:</strong> ${requestId}</div>
-                    <div><strong>Status:</strong> Completed</div>
-                    <div><strong>Client:</strong> Sample Client</div>
-                    <div><strong>Added By:</strong> User</div>
-                    <div><strong>Created:</strong> 2024-01-01</div>
-                    <div><strong>Execution Time:</strong> 2.5s</div>
-                </div>
-            `;
+
+            fetch('/view_stats', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ id:requestId })
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json(); // Convert response to JSON
+                })
+                .then(data =>{
+                    const stats=data.stats;
+                    // TODO: Fetch request details from API
+                    const viewContent = document.getElementById('viewContent');
+                    viewContent.innerHTML = `
+                        <div class="grid grid-cols-2 gap-4">
+
+                            <div><strong>Request ID:</strong> ${stats[0][0]}</div>
+                            <div><strong>Status:</strong> ${stats[0][4]}</div>
+                            <div><strong>Client:</strong> ${stats[0][1]}</div>
+                            <div><strong>Added By:</strong> ${stats[0][2]}</div>
+                            <div><strong>Execution Time:</strong> ${stats[0][7]}</div>
+
+                            <div class="relative group inline-block">
+                                <strong class="text-pointer">Trt Count:</strong>
+                                <div class="absolute left-0 bottom-full mb-1 bg-black text-white font-bold text-sm px-2 py-1 rounded shadow-lg z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap inline-flex">TRT File Count
+                                    <div class="absolute left-1/8 -translate-x-1/2 top-full w-0 h-0" style=" border-left: 6px solid transparent;border-right: 6px solid transparent;border-top: 6px solid #0b132b;"></div>    
+                                </div> 
+                                <span>${stats[0][3]}</span>
+                            </div>
+
+                            <div class="relative group inline-block">
+                                <strong class="text-pointer">UHSC:</strong>
+                                <div class="absolute left-0 bottom-full mb-1 bg-black text-white font-bold text-sm px-2 py-1 rounded shadow-lg z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap inline-flex">POSTED UNSUB HARDS SUPP COUNT
+                                    <div class="absolute left-1/8 -translate-x-1/2 top-full w-0 h-0" style=" border-left: 6px solid transparent;border-right: 6px solid transparent;border-top: 6px solid #0b132b;"></div>    
+                                </div>
+                                <span>${stats[0][0]}</span>
+                            </div>
+
+                            <div class="relative group inline-block">
+                                <strong class="text-pointer">OSC:</strong>
+                                <div class="absolute left-0 bottom-full mb-1 bg-black text-white font-bold text-sm px-2 py-1 rounded shadow-lg z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap inline-flex">Offer Id Suppression Count
+                                    <div class="absolute left-1/8 -translate-x-1/2 top-full w-0 h-0" style=" border-left: 6px solid transparent;border-right: 6px solid transparent;border-top: 6px solid #0b132b;"></div>    
+                                </div>
+                                <span>${stats[0][9]}</span>
+                            </div>
+
+                            <div class="relative group inline-block">
+                                <strong class="text-pointer">CSC:</strong>
+                                <div class="absolute left-0 bottom-full mb-1 bg-black text-white font-bold text-sm px-2 py-1 rounded shadow-lg z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap inline-flex">Client Suppression Count
+                                    <div class="absolute left-1/8 -translate-x-1/2 top-full w-0 h-0" style=" border-left: 6px solid transparent;border-right: 6px solid transparent;border-top: 6px solid #0b132b;"></div>    
+                                </div>
+                                <span>${stats[0][10]}</span>
+                            </div>
+                                
+                            <div class="relative group inline-block">
+                                <strong class="text-pointer">Touch:</strong>
+                                <div class="absolute left-0 bottom-full mb-1 bg-black text-white font-bold text-sm px-2 py-1 rounded shadow-lg z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap inline-flex">Max Touch Count
+                                    <div class="absolute left-1/8 -translate-x-1/2 top-full w-0 h-0" style=" border-left: 6px solid transparent;border-right: 6px solid transparent;border-top: 6px solid #0b132b;"></div>    
+                                </div>
+                                <span>${stats[0][11]}</span>
+                            </div>
+
+                            <div class="relative group inline-block">
+                                <strong class="text-pointer">LWDIC:</strong>
+                                <div class="absolute left-0 bottom-full mb-1 bg-black text-white font-bold text-sm px-2 py-1 rounded shadow-lg z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap inline-flex">Last Week Delivered Inserted Count
+                                    <div class="absolute left-1/8 -translate-x-1/2 top-full w-0 h-0" style=" border-left: 6px solid transparent;border-right: 6px solid transparent;border-top: 6px solid #0b132b;"></div>    
+                                </div>
+                                <span>${stats[0][12]}</span>
+                            </div>
+
+                            <div class="relative group inline-block">
+                                <strong class="text-pointer">Unsub IC:</strong>
+                                <div class="absolute left-0 bottom-full mb-1 bg-black text-white font-bold text-sm px-2 py-1 rounded shadow-lg z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap inline-flex">Unsub Inserted Count
+                                    <div class="absolute left-1/8 -translate-x-1/2 top-full w-0 h-0" style=" border-left: 6px solid transparent;border-right: 6px solid transparent;border-top: 6px solid #0b132b;"></div>    
+                                </div>
+                                <span>${stats[0][13]}</span>
+                            </div>
+
+                            <div class="relative group inline-block">
+                                <strong class="text-pointer">Unique DC:</strong>
+                                <div class="absolute left-0 bottom-full mb-1 bg-black text-white font-bold text-sm px-2 py-1 rounded shadow-lg z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap inline-flex">Unique Delivered Count
+                                    <div class="absolute left-1/8 -translate-x-1/2 top-full w-0 h-0" style=" border-left: 6px solid transparent;border-right: 6px solid transparent;border-top: 6px solid #0b132b;"></div>    
+                                </div>
+                                <span>${stats[0][14]}</span>
+                            </div>
+
+                            <div class="relative group inline-block">
+                                <strong class="text-pointer">Total DC:</strong>
+                                <div class="absolute left-0 bottom-full mb-1 bg-black text-white font-bold text-sm px-2 py-1 rounded shadow-lg z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap inline-flex">Total Delivered Count
+                                    <div class="absolute left-1/8 -translate-x-1/2 top-full w-0 h-0" style=" border-left: 6px solid transparent;border-right: 6px solid transparent;border-top: 6px solid #0b132b;"></div>    
+                                </div>
+                                <span>${stats[0][15]}</span>
+                            </div>
+
+                            <div class="relative group inline-block">
+                                <strong class="text-pointer">NARC:</strong> 
+                                <div class="absolute left-0 bottom-full mb-1 bg-black text-white font-bold text-sm px-2 py-1 rounded shadow-lg z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap inline-flex">Newly Added Records Count
+                                    <div class="absolute left-1/8 -translate-x-1/2 top-full w-0 h-0" style=" border-left: 6px solid transparent;border-right: 6px solid transparent;border-top: 6px solid #0b132b;"></div>    
+                                </div>
+                                <span>${stats[0][16]}</span>
+                            </div>
+
+                            <div class="relative group inline-block">
+                                <strong class="text-pointer">IP Count:</strong>
+                                <div class="absolute left-0 bottom-full mb-1 bg-black text-white font-bold text-sm px-2 py-1 rounded shadow-lg z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap inline-flex">Newly Added IP Count
+                                    <div class="absolute left-1/8 -translate-x-1/2 top-full w-0 h-0" style=" border-left: 6px solid transparent;border-right: 6px solid transparent;border-top: 6px solid #0b132b;"></div>    
+                                </div>
+                                <span>${stats[0][17]}</span>
+                            </div>
+
+                            <div class="relative group inline-block">
+                                <strong class="text-pointer">Total UC:</strong>
+                                <div class="absolute left-0 bottom-full mb-1 bg-black text-white font-bold text-sm px-2 py-1 rounded shadow-lg z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap inline-flex">Total Running Unique Count
+                                    <div class="absolute left-1/8 -translate-x-1/2 top-full w-0 h-0" style=" border-left: 6px solid transparent;border-right: 6px solid transparent;border-top: 6px solid #0b132b;"></div>    
+                                </div>
+                                <span>${stats[0][18]}</span>
+                            </div>
+                        </div>
+                    `;
+
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                    viewContent.innerHTML = `<p>Error loading data</p>`;
+                });
             document.getElementById('viewModal').classList.remove('hidden');
         }
 
@@ -685,6 +810,62 @@
                 });
             });
         });
+
+        //TO Drag the View Modal
+        document.addEventListener("DOMContentLoaded", () => {
+            //makeDraggable("draggableReRunModal","modalReRunHeader");
+            makeDraggable("draggableViewModal","modalViewHeader");
+            makeDraggable("draggableUploadModal","modalUploadHeader");
+        });
+
+        function makeDraggable(draggableModal,modalHeader){
+        const modal = document.getElementById(draggableModal);
+        const header = document.getElementById(modalHeader);
+
+        let isDragging = false;
+        let offsetX = 0, offsetY = 0;
+
+        header.addEventListener("mousedown", (e) => {
+            isDragging = true;
+            const rect = modal.getBoundingClientRect();
+            offsetX = e.clientX - rect.left;
+            offsetY = e.clientY - rect.top;
+            header.style.cursor = "grabbing";
+        });
+
+        window.addEventListener("mousemove", (e) => {
+            if (!isDragging) return;
+
+            // Calculate new position
+            let left = e.clientX - offsetX;
+            let top = e.clientY - offsetY;
+
+            // Get window boundaries
+            const maxLeft = window.innerWidth - modal.offsetWidth;
+            const maxTop = window.innerHeight - modal.offsetHeight;
+
+            // Clamp values so modal stays visible
+            if (left < 0) left = 0;
+            if (top < 0) top = 0;
+            if (left > maxLeft) left = maxLeft;
+            if (top > maxTop) top = maxTop;
+
+            modal.style.left = `${left}px`;
+            modal.style.top = `${top}px`;
+        });
+
+        window.addEventListener("mouseup", () => {
+            isDragging = false;
+            header.style.cursor = "move";
+        });
+
+        header.addEventListener("dblclick", () => {
+        const left = (window.innerWidth - modal.offsetWidth) / 2;
+        const top = (window.innerHeight - modal.offsetHeight) / 2;
+        modal.style.left = `${left}px`;
+        modal.style.top = `${top}px`;
+        });
+        }
         </script>
         
     
