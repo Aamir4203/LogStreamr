@@ -224,7 +224,7 @@
                         <!-- ReRun Button - only for completed/errored -->
                         <td class="text-center">
                             {% if log[4] in ['C', 'E'] %}
-                            <button onclick="openReRunModal('{{ log[0] }}')" class="bg-blue-500 text-white px-2 py-1 text-xs rounded hover:bg-blue-600" title="ReRun">
+                            <button onclick="openReRunModal('{{ log[0] }}','{{ log[4] }}','{{ log[7] }}')" class="bg-blue-500 text-white px-2 py-1 text-xs rounded hover:bg-blue-600" title="ReRun">
                                 <i class="ri-refresh-line"></i>
                             </button>
                             {% endif %}
@@ -366,14 +366,13 @@
             <div class="p-4">
                 <select id="reRunModule" class="w-full border border-gray-300 rounded-md px-3 py-2 mb-4">
                     <option value="">Select Module</option>
-                    <option value="trt">TRT Module</option>
-                    <option value="logs">Logs Module</option>
-                    <option value="suppression">Client Suppression Module</option>
-                    <option value="source">Source Module</option>
-                    <option value="report">Report Module</option>
-                    <option value="timestamps">TimeStamps Module</option>
-                    <option value="ip">IP Module</option>
-                    <option value="repull">RePull</option>
+                    <option value="1">TRT Module</option>
+                    <option value="2">Logs Module</option>
+                    <option value="3">Client Suppression Module</option>
+                    <option value="4">Source Module</option>
+                    <option value="5">Report Module</option>
+                    <option value="6">TimeStamps Module</option>
+                    <option value="7">IP Module</option>
                 </select>
                 <div class="flex justify-end gap-2">
                     <button onclick="closeReRunModal()" class="bg-gray-500 text-white px-4 py-2 rounded">Cancel</button>
@@ -538,8 +537,24 @@
         });
 
         // ReRun Modal Functions
-        function openReRunModal(requestId) {
+        function openReRunModal(requestId,status,error_code) {
             currentRequestId = requestId;
+            const select = document.getElementById('reRunModule');
+
+            // Reset dropdown
+            for (let i = 0; i < select.options.length; i++) {
+                select.options[i].style.display = 'block'; 
+            }
+
+			if (status === 'E') {
+				for (let i = 0; i < select.options.length; i++) {
+					const optionValue = parseInt(select.options[i].value);
+						if (!isNaN(optionValue) && optionValue > error_code) {
+							select.options[i].style.display = 'none';
+						}
+				}
+			}
+
             document.getElementById('reRunModal').classList.remove('hidden');
         }
 
@@ -555,10 +570,34 @@
                 return;
             }
             
-            // TODO: Implement API call
-            console.log('ReRunning request', currentRequestId, 'with module:', module);
-            alert('ReRun request submitted for module: ' + module);
-            closeReRunModal();
+            // Call the rerun module
+			fetch('/rerun', {
+				method: 'POST',
+				headers: {'Content-Type': 'application/json'},
+				body: JSON.stringify({ request_id: currentRequestId,module : module }),
+			})
+			.then(response => response.json())
+			.then(data => {
+				// Close ReRunModal
+				closeReRunModal();
+                alert(data.message);
+                console.log(data.message);
+
+			    /*if (data.success) {
+					console.log('ReRunning request', currentRequestId, 'with module:', module);
+					alert('ReRun request submitted for module: ' + module);
+                    closeReRunModal();
+				} else {
+					alert("Failed to ReRun.");
+				}*/
+			})
+
+			.catch(error => {
+				console.error("Error:", error);
+				// Close ReRunModal
+				closeReRunModal();
+				alert("An error occurred. Please try again.");
+			});
         }
 
         // View Modal Functions
