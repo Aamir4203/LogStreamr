@@ -204,7 +204,7 @@ then
 
                 sh -x $SCRIPTPATH/partitioningSrc.sh  $new_request_id >>$HOMEPATH/LOGS/$new_request_id.log 2>>$HOMEPATH/LOGS/$new_request_id.log
 
-                get_status=`$CONNECTION_STRING -qtAX -c "select upper(REQUEST_STATUS) from $REQUEST_TABLE where REQUEST_STATUS='E' and REQUEST_ID=$REQUEST_ID "`
+                get_status=`$CONNECTION_STRING -qtAX -c "select upper(REQUEST_STATUS) from $REQUEST_TABLE where REQUEST_ID=$REQUEST_ID "`
 
                 if [[ $get_status == 'E' ]]
                 then
