@@ -114,7 +114,7 @@ then
 
 
 
-elif [[ "$new_request_status" = "RW" ]] || [[ "$new_request_status" = "RE" ]]
+elif [[ "$new_request_status" == "RW" ]] || [[ "$new_request_status" == "RE" ]]
 then
 
 		if [[ $new_request_status == 'RW' ]]
