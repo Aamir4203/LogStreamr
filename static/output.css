@@ -675,6 +675,10 @@ video {
   margin-top: -0.75rem;
 }
 
+.mt-0{
+  margin-top: 0px;
+}
+
 .mb-0 {
   margin-bottom: 0px;
 }
@@ -683,14 +687,24 @@ video {
   margin-bottom: 0.25rem;
 }
 
+.mb-3{
+  margin-bottom: 0.75rem;
+}
 .mb-4 {
   margin-bottom: 1rem;
+}
+
+.mb-5 {
+  margin-bottom: 1.25rem;
 }
 
 .mb-6 {
   margin-bottom: 1.5rem;
 }
 
+.ml-0{
+  margin-left: 0px;
+}
 .ml-1 {
   margin-left: 0.25rem;
 }
@@ -707,6 +721,9 @@ video {
   margin-left: auto;
 }
 
+.mr-0{
+  margin-right: 0px;
+}
 .mr-1 {
   margin-right: 0.25rem;
 }
@@ -1941,4 +1958,370 @@ body{
     --tw-ring-opacity: 1;
     --tw-ring-color: rgb(37 99 235 / var(--tw-ring-opacity));
   }
+}
+
+
+@keyframes slideDown {
+  0% { transform: translateY(-5px); opacity: 0; }
+  50% { transform: translateY(5px); opacity: 1; }
+  100% { transform: translateY(-5px); opacity: 0; }
+}
+.download-slide {
+  animation: slideDown 1s infinite;
+}
+
+
+/* Custom-Download Styling Start */
+
+/* ------------------------------
+    SAVED DOWNLOAD COLUMNS
+------------------------------ */
+
+.customDownloadColumns #savedDownloadColumns {
+    gap: 10px;
+}
+
+.customDownloadColumns #savedDownloadColumns h3 {
+    color: #2c3e50;
+}
+
+.customDownloadColumns .savedItems {
+    padding: 8px 14px;
+    border-radius: 14px;
+    background: #3498db;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+}
+
+.customDownloadColumns .savedItems:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    background: #2980b9;
+}
+
+.customDownloadColumns .savedItems_hover-preview {
+    display: none;
+    position: absolute;
+    bottom: 45px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #2c3e50;
+    color: #fff;
+    padding: 6px 12px;
+    font-size: 12px;
+    border-radius: 6px;
+    white-space: nowrap;
+    z-index: 10;
+    opacity: 0;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.customDownloadColumns .savedItems_hover-preview::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 6px;
+    border-style: solid;
+    border-color: #2c3e50 transparent transparent transparent;
+}
+
+.customDownloadColumns .savedItems:hover .savedItems_hover-preview {
+    display: block;
+    opacity: 1;
+    transform: translateX(-50%) translateY(-5px);
+}
+
+
+/* ------------------------------
+    CHECKBOX CONTAINER
+------------------------------ */
+
+.customDownloadColumns #downloadCheckboxContainer {
+    background: transparent;
+    padding: 20px 0;
+    border-radius: 12px;
+}
+
+.customDownloadColumns #downloadCheckboxContainer label {
+    align-items: center;
+    padding: 6px 0;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.customDownloadColumns #downloadCheckboxContainer input[type="checkbox"] {
+    margin-right: 10px;
+    width: 16px;
+    height: 16px;
+    accent-color: #3498db;
+    cursor: pointer;
+}
+
+/* Save button inside checkbox container */
+.saveBtn {
+    padding: 8px 16px;
+    border-radius: 10px;
+    background: #004764;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    display: none;          /* allow centering */
+    margin: 15px auto 0;     /* centered horizontally below container */
+    box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+    transition: background 0.3s, transform 0.2s;
+}
+
+.saveBtn:hover {
+    background: #004770;   /* Slightly darker blue */
+    transform: translateY(-2px);
+}
+
+
+/* ------------------------------
+       BUTTONS CONTAINER
+------------------------------ */
+
+
+#addBtn {
+    padding: 10px 16px;
+    font-size: 15px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    color: #fff;
+    background: #3498db;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+    transition: background 0.3s, transform 0.2s;
+}
+
+#addBtn:hover {
+    background: #2980b9;
+    transform: translateY(-2px);
+}
+
+
+/* ------------------------------
+       MODAL OVERLAY
+------------------------------ */
+
+.customDownloadColumns .downLoadCustomPreview {
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s ease, background 0.5s ease;
+    z-index: 100;
+}
+
+.customDownloadColumns .downLoadCustomPreview.show {
+    opacity: 1;
+    pointer-events: auto;
+    background: rgba(0,0,0,0.5);
+}
+
+
+/* ------------------------------
+       MODAL CONTENT
+------------------------------ */
+
+.customDownloadColumns .downLoadCustomPreview-content {
+    background: #fff;
+    padding: 25px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 80%;
+    /*overflow-y: auto;*/
+    border-radius: 16px;
+    box-shadow: 0 5px 25px rgba(0,0,0,0.3);
+    transform: translateY(100px);
+    opacity: 0;
+    transition: transform 0.5s ease, opacity 0.5s ease;
+    position: relative;
+    padding-bottom: 90px; /* Needed space for downloadBtn */
+}
+
+.customDownloadColumns .downLoadCustomPreview.show .downLoadCustomPreview-content {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.customDownloadColumns .closeBtn {
+    float: right;
+    cursor: pointer;
+    font-size: 22px;
+    color: #e74c3c;
+}
+
+/* ------------------------------
+   SAVED QUERY FIELDS INSIDE MODAL
+------------------------------ */
+
+.customDownloadColumns .savedItem-field {
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.customDownloadColumns .savedItem-values {
+    overflow-x: auto;
+    gap: 6px;
+    padding: 6px 4px;
+    border-radius: 8px;
+    width: 450px;
+}
+
+.customDownloadColumns .value-pill {
+    background: #ecf6fc;
+    padding: 4px 10px;
+    border-radius: 8px;
+    white-space: nowrap;
+    font-size: 13px;
+}
+
+
+/* ------------------------------
+             ICON BUTTONS
+------------------------------ */
+
+.customDownloadColumns .icon-btn {
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 18px;
+    margin-left: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s;
+}
+
+.customDownloadColumns .icon-btn:hover {
+    transform: scale(1.2);
+}
+
+.customDownloadColumns .delete-icon {
+    color: #e74c3c;
+}
+
+.customDownloadColumns .pencil-icon {
+    color: #2c3e50;
+}
+
+
+/* ------------------------------
+     FIXED DOWNLOAD BUTTON
+------------------------------ */
+
+.scrollable-content {
+    max-height: 60vh;      
+    overflow-y: auto;
+    margin-top: 10px;
+    padding-right: 8px;
+}
+
+.downLoadCustomPreview-content #downloadBtn {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    padding: 10px 16px;
+    border-radius: 12px;
+    border: none;
+    font-weight: 600;
+    background: #27ae60;
+    color: #fff;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transition: background 0.3s, transform 0.2s;
+    z-index: 10;
+}
+
+.downLoadCustomPreview-content #downloadBtn:hover {
+    background: #1e8449;
+    transform: translateY(-2px);
+}
+
+
+/* ------------------------------
+              ERROR POPUP
+------------------------------ */
+
+#ErrorPopup {
+    display: none;
+    position: fixed;
+    top: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #e74c3c;
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-weight: 600;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    z-index: 200;
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+#ErrorPopup.show {
+    display: block;
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+body.freeze::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0); /* invisible */
+    z-index: 999999;
+    pointer-events: auto; /* block all interactions */
+}
+
+/* Custom-Download End*/
+
+/* Loading */
+
+#loadingSpinner {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  align-items: center;
+  gap: 10px;
+  padding: 20px 30px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  border-radius: 10px;
+  z-index: 9999;
+}
+
+#loadingSpinner.hidden {
+  display: none;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #ffffff55;
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
