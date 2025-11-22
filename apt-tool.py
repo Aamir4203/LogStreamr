@@ -1,8 +1,12 @@
-from flask import Flask, render_template, request, redirect, url_for,jsonify
+from flask import Flask, render_template, request, redirect, url_for,jsonify,send_file
 from datetime import datetime
 import psycopg2
 import subprocess
 import logging
+import pandas as pd
+from io import BytesIO
+import openpyxl
+
 app = Flask(__name__)
 
 logging.basicConfig(filename='app.log', level=logging.INFO)
@@ -166,6 +170,90 @@ def rerun():
             return jsonify({"success": False, "message": str(e)}), 500
     finally:
          cursor.close()
+
+@app.route('/get_request_fields', methods=['POST'])
+def get_request_fields():
+    data = request.get_json()
+    request_id = data.get('request_id')
+    if not request_id:
+        return jsonify({'success': False, 'message': 'Request ID required'}), 400
+    cursor = conn.cursor()
+    try:
+        # Get week and client_name for this request
+        cursor.execute("select a.week, b.client_name FROM apt_custom_postback_request_details_dnd a join apt_custom_client_info_table_dnd b on a.client_id = b.client_id where a.request_id = %s", (request_id,))
+        row = cursor.fetchone()
+        if not row:
+            return jsonify({'success': False, 'message': 'Request not found'}), 404
+        week, client_name = row
+        PB_TABLE = f"APT_CUSTOM_{request_id}_{client_name}_{week}_POSTBACK_TABLE".lower()
+        # Get fields from PB_TABLE
+        cursor.execute(f"SELECT * FROM {PB_TABLE} WHERE false")
+        pb_colnames = [desc[0] for desc in cursor.description]
+        if not pb_colnames:
+            return jsonify({'success': False, 'message': f'No data found in {PB_TABLE}'}), 404        
+        exclude_fields = {'diff', 'unsub', 'status', 'id', 'touch', 'freq', 'priority'}
+        fields = [col for col in pb_colnames if col.lower() not in exclude_fields]
+        return jsonify({'success': True, 'fields': fields, 'client_name': client_name})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+    finally:
+        cursor.close()
+
+#For Downloading   
+@app.route('/download',methods=['POST'])
+def download():
+    data=request.get_json()
+    id = data.get('id')
+    req_columns=data.get('req_columns')
+    option=data.get('option')
+    sheet_names=data.get('sheetNames')
+    
+    cursor = conn.cursor()
+    cursor.execute(f"select client_id,week from APT_CUSTOM_POSTBACK_REQUEST_DETAILS_DND where request_id={id}")
+    result=cursor.fetchall()
+    if result is not None:
+        client_id,week=result[0]
+    cursor.execute(f"select client_name from APT_CUSTOM_CLIENT_INFO_TABLE_DND where client_id={client_id}")
+    client_name=cursor.fetchall()[0][0]
+    postback_table=f"APT_CUSTOM_{id}_{client_name}_{week}_POSTBACK_TABLE"
+
+    query_map={
+        'Sent': 'count(email)sent',
+        'Delivered':'sum(case when flag is null then 1 else 0 end)delivered',
+        'Opens':'count(open_date)opens',
+        'Clicks':'count(click_date)clicks',
+        'Unsubs':'count(unsub_date)unsubs',
+        'Softs':'sum(case when flag=\'S\' then 1 else 0 end)softs',
+        'Hards':'sum(case when flag=\'B\' then 1 else 0 end)hards'
+    }
+    file_name=f"{option}_Stats_{client_name}_{week}_{id}.xlsx"
+    output = BytesIO()
+    with pd.ExcelWriter(output,engine='openpyxl') as writer:
+        for col,sheet in zip(req_columns,sheet_names):
+            select,group,order="select ","group by "," order by "
+            for i in range(len(col)):
+                if col[i] in query_map:
+                    select+=query_map[col[i]]+","
+                else:
+                    select+=col[i]+","
+                    group+=f"{i+1},"
+                    order+=f"{i+1},"
+            query=select[:-1]+(f" from {postback_table} ")+group[:-1]+order[:-1]
+            cursor.execute(query)
+            stats=cursor.fetchall()
+            df=pd.DataFrame(stats,columns=col)
+            df.to_excel(writer,sheet_name=sheet,index=False)
+
+    output.seek(0)            
+    
+
+    return send_file(
+            output,
+            as_attachment=True,
+            download_name=file_name,
+            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        ), 200
+    
 
 if __name__ == "__main__":
     app.run(debug=True,host='127.0.0.1',port=5000)
