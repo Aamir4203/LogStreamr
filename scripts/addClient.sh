@@ -27,7 +27,7 @@ NEW_CLIENT_PREV_PB_TABLE=APT_ADHOC_$NEW_CLIENT_NAME\_PREV_POSTBACK_DND
 
 
 
-$CONNECTION_STRING -vv -c "create table $NEW_CLIENT_TOTAL_DEL_TABLE(email varchar unique,segment varchar) "
+$CONNECTION_STRING -vv -c "create table $NEW_CLIENT_TOTAL_DEL_TABLE(email varchar unique,segment varchar,del_date varchar,week varchar default '#',touch int default 0) "
 
 if [[ $? -ne 0 ]]
 then
