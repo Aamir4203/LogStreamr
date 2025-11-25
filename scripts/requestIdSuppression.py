@@ -1,3 +1,4 @@
+
 import os
 import sys
 import logging
@@ -19,6 +20,7 @@ logger = logging.getLogger(__name__)
 SCRIPTPATH = sys.argv[1]
 REQUEST_ID = sys.argv[2]
 TRT_TABLE = sys.argv[3]
+QA_TABLE = sys.argv[4]
 
 logger.info(f"Started Request Suppression Script for REQUEST_ID={REQUEST_ID}")
 
@@ -103,8 +105,9 @@ for cli_id in supp_client_ids:
 
         deleted_count = int(output)
         total_suppressed += deleted_count
-
         logger.info(f"Suppressed {deleted_count} records for client_id={cli_id}")
+        update_query = f"UPDATE {QA_TABLE} SET REQUEST_ID_SUPP_COUNT = %s WHERE REQUEST_ID = %s"
+        cur.execute(update_query, (total_suppressed, REQUEST_ID))
 
     except subprocess.CalledProcessError as e:
         logger.error(f"Error running delete_partitions.py: {e}")
