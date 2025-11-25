@@ -1,4 +1,3 @@
-
 #/bin/bash
 
 source /u1/techteam/PFM_CUSTOM_SCRIPTS/APT_TOOL_DB/REQUEST_PROCESSING/$1/ETC/config.properties
@@ -33,8 +32,8 @@ error_fun()
     ( '<b>ADDED_BY</b>', ADDED_BY::text)) x(Header, Value)" >$SPOOLPATH/fetchRequestDetails.csv
 
     sh $SCRIPTPATH/sendMail.sh "$REQUEST_ID"
-	exit
-    
+        exit
+
 }
 
 
@@ -49,6 +48,7 @@ report_path=`$CONNECTION_STRING -qtAX -c "select CPM_REPORT_PATH from  $REQUEST_
 $CONNECTION_STRING -vv -c "UPDATE $REQUEST_TABLE SET REQUEST_DESC='Preparing suppresssion data' WHERE REQUEST_ID=$REQUEST_ID "
 
 supp_path=`$CONNECTION_STRING -qtAX -c "select SUPP_PATH from  $REQUEST_TABLE where REQUEST_ID=$REQUEST_ID"`
+request_id_supp=`$CONNECTION_STRING -qtAX -c "select REQUEST_ID_SUPP from  $REQUEST_TABLE where REQUEST_ID=$REQUEST_ID"`
 
 
 if [[ $supp_path != '' ]]
@@ -68,7 +68,7 @@ then
         if [[ $? -ne 0 ]]
         then
 
-				error_fun "3" "Unable to copy suppression data file to the table"
+                                error_fun "3" "Unable to copy suppression data file to the table"
                 exit
 
 
@@ -76,21 +76,21 @@ then
 
                 $CONNECTION_STRING -vv -c "update $REQUEST_TABLE set  REQUEST_DESC='SuppressionTable Created' where REQUEST_ID=$REQUEST_ID "
 
-	fi
-	
-	supp_index="supp_email_$REQUEST_ID"
-	$CONNECTION_STRING -vv -c "create index $supp_index on $SUPP_TABLE(EMAIL)"
+        fi
+
+        supp_index="supp_email_$REQUEST_ID"
+        $CONNECTION_STRING -vv -c "create index $supp_index on $SUPP_TABLE(EMAIL)"
 
         #suppressed_cnt=`$CONNECTION_STRING -qtAX -c "with cte as (delete from $TRT_TABLE a using $SUPP_TABLE b where a.email=b.email returning 1) select count(*) from cte"`
-        
-	query="delete from $TRT_TABLE a using $SUPP_TABLE b where a.email=b.email "
-	suppressed_cnt=$(python3 $SCRIPTPATH/delete_partitions.py "$query")
-	
-	
-	if [[ $? -ne 0 ]]
+
+        query="delete from $TRT_TABLE a using $SUPP_TABLE b where a.email=b.email "
+        suppressed_cnt=$(python3 $SCRIPTPATH/delete_partitions.py "$query")
+
+
+        if [[ $? -ne 0 ]]
         then
 
-			error_fun "3" "Unable to perform suppression to the TRT"
+                        error_fun "3" "Unable to perform suppression to the TRT"
             exit
         else
 
@@ -106,8 +106,8 @@ else
         $CONNECTION_STRING -vv -c "\copy $SUPP_TABLE from '$supp_path'"
         if [[ $? -ne 0 ]]
         then
-				
-			error_fun "3" "Unable to copy suppression data to TRT on Md5hash"
+
+                        error_fun "3" "Unable to copy suppression data to TRT on Md5hash"
             exit
 
 
@@ -116,37 +116,53 @@ else
                 $CONNECTION_STRING -vv -c "update $REQUEST_TABLE set  REQUEST_DESC='SuppressionTable Created' where REQUEST_ID=$REQUEST_ID"
 
         fi
-	supp_index="supp_md5_$REQUEST_ID"
-	$CONNECTION_STRING -vv -c "create index $supp_index on $SUPP_TABLE(MD5HASH)"
+        supp_index="supp_md5_$REQUEST_ID"
+        $CONNECTION_STRING -vv -c "create index $supp_index on $SUPP_TABLE(MD5HASH)"
 
-	echo "MODULE3: SUPPRESSION START TIME: `date`"
+        echo "MODULE3: SUPPRESSION START TIME: `date`"
         #suppressed_cnt=`$CONNECTION_STRING -qtAX -c "SET enable_seqscan TO off;with cte as (delete from $TRT_TABLE a using $SUPP_TABLE b where a.md5hash=b.md5hash returning 1) select count(*) from cte"`
-	
-	query="delete from $TRT_TABLE a using $SUPP_TABLE b where a.md5hash=b.md5hash "
-	suppressed_cnt=$(python3 $SCRIPTPATH/delete_partitions.py "$query")
 
-		
+        query="delete from $TRT_TABLE a using $SUPP_TABLE b where a.md5hash=b.md5hash "
+        suppressed_cnt=$(python3 $SCRIPTPATH/delete_partitions.py "$query")
+
+
         if [[ $? -ne 0 ]]
         then
 
-			error_fun "3" "Unable to perform suppression to the TRT on Md5hash"
+                        error_fun "3" "Unable to perform suppression to the TRT on Md5hash"
             exit
 
 
         else
 
                 $CONNECTION_STRING -vv -c "update $REQUEST_TABLE set   ERROR_CODE=0,REQUEST_STATUS='R',REQUEST_DESC='Client Suppressions Performed.' where REQUEST_ID=$REQUEST_ID "
-				
+
                 $CONNECTION_STRING -vv -c "UPDATE $QA_TABLE SET SUPPRESSION_COUNT=$suppressed_cnt WHERE REQUEST_ID=$REQUEST_ID "
 
         fi
 
-	echo "MODULE3: SUPPRESSION END TIME: `date`"
+        echo "MODULE3: SUPPRESSION END TIME: `date`"
 
 fi
+
+fi
+
+if [[ $request_id_supp != '' ]]
+then
+
+	echo "MODULE3: REQUEST_ID SUPPRESSION START TIME: `date`"
+
+	python3 $SCRIPTPATH/requestIdSuppression.py "$SCRIPTPATH" "$REQUEST_ID" "$TRT_TABLE" "$QA_TABLE"
+
+	if [[ $? -ne 0 ]]
+	then
+
+					error_fun "3" "Unable to perform suppression to the TRT on Request_Id"
+		exit
+
+	fi
+	echo "MODULE3: REQUEST_ID SUPPRESSION END TIME: `date`"
 
 fi
 
 sh -x $SCRIPTPATH/srcPreparation.sh  $REQUEST_ID >>$HOMEPATH/LOGS/$REQUEST_ID.log 2>>$HOMEPATH/LOGS/$REQUEST_ID.log
-
-
