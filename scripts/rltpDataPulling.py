@@ -1,6 +1,7 @@
 import pandas as pd
 import os
 import sys
+import subprocess
 sys.path.append('/u1/techteam/PFM_CUSTOM_SCRIPTS/PYTHON_MODULES')
 from sqlalchemy import create_engine, inspect
 import re
@@ -18,11 +19,6 @@ import warnings
 warnings.filterwarnings("ignore", category=UserWarning)
 
 
-
-
-
-
-
 def init_worker(shared_event):
     global event
     event = shared_event
@@ -32,8 +28,19 @@ def status_up(desc):
     apt_tool_Db().close()
 
 def main(args):
-    client, trt_tb, qr, presto_config, pg_config,sup_l,n,deciles_,indx_val,indx_creation,client_id=args
+    client, trt_tb, qr, presto_config, pg_config,sup_l,n,deciles_,indx_val,indx_creation,client_id,Audit_TRT_limit=args
     try:
+        # Track this worker process
+        track_command = f'''
+        track_process() {{
+            source /u1/techteam/PFM_CUSTOM_SCRIPTS/APT_TOOL_DB/REQUEST_PROCESSING/$1/ETC/config.properties
+            source $TRACKING_HELPER
+            append_process_id $1 "RLTP_WORKER_{client}"
+        }}
+        track_process {sys.argv[1]}
+        '''
+        subprocess.run(['bash', '-c', track_command], check=False)
+
         if event.is_set():
            return
         if deciles_=='True':
@@ -44,7 +51,7 @@ def main(args):
                 qr = f"{qr} and {de}='{client}' "
         dstart_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         logger.info(f"RLTP Data pulling started for decile {client} at : {dstart_time}")
-        
+
         if int(re.findall('apt_rltp_request_raw_(\d+)_postback_file',qr)[0])>28388:
             pconn,pcur=getSnowflake()
         else:
@@ -59,8 +66,8 @@ def main(args):
             session_settings = pcur.fetchall()
             logger.info(f"Session settings:{session_settings}")
         if client_id in [180,181,182,183,184,185,187,188,189,190]:
-            qr=f"{qr} order by random() limit 100000000"
-        logger.info(f"Execution query ::{qr}")    
+            qr=f"{qr} order by random() limit {Audit_TRT_limit}"
+        logger.info(f"Execution query ::{qr}")
         pcur.execute(qr)
         #print(client)
         d_file = f'{path}/FILES/decile_{client}.csv'
@@ -149,7 +156,20 @@ if __name__ == "__main__":
         global logger,path,df
         n=1
         request_id=sys.argv[1]
+
+        # Track main process
+        track_command = f'''
+        track_process() {{
+            source /u1/techteam/PFM_CUSTOM_SCRIPTS/APT_TOOL_DB/REQUEST_PROCESSING/$1/ETC/config.properties
+            source $TRACKING_HELPER
+            append_process_id $1 "RLTP_MAIN"
+        }}
+        track_process {request_id}
+        '''
+        subprocess.run(['bash', '-c', track_command], check=False)
+
         path='/u1/techteam/PFM_CUSTOM_SCRIPTS/APT_TOOL_DB/REQUEST_PROCESSING/'+request_id
+        SCRIPTPATH = f"{path}/SCRIPTS/"
         lpath=path+"/LOGS"
         logger = log_module.setup_logging(lpath)
         logger.info("Logs path: {}".format(lpath))
@@ -175,11 +195,24 @@ if __name__ == "__main__":
             conn.autocommit = True
             with conn.cursor() as cursor:
                 engine = create_engine('postgresql+psycopg2://datateam:@zds-prod-pgdb01-01.bo3.e-dialog.com/apt_tool_db')
-                df = pd.read_sql("SELECT a.request_id,a.week,a.query,a.decile_wise_report_path,b.client_name,a.SUPP_PATH,a.client_id FROM APT_CUSTOM_POSTBACK_REQUEST_DETAILS_DND a,apt_custom_client_info_table_dnd b  WHERE request_id="+request_id+" and a.client_id=b.client_id", con=engine)
+                df = pd.read_sql("SELECT a.request_id,a.priority_file FROM APT_CUSTOM_POSTBACK_REQUEST_DETAILS_DND a,apt_custom_client_info_table_dnd b  WHERE request_id="+request_id+" and a.client_id=b.client_id", con=engine)
+                priority_f=df['priority_file'].iat[0]
+                if priority_f is not None and str(priority_f).strip() != "":
+                    print(f"Priority flag Start time: {datetime.now()}")
+                    try:
+                        result = subprocess.run(["/usr/bin/python3", f"{SCRIPTPATH}/priority_flag.py", str(request_id)],check=True,capture_output=True,text=True)
+                        print(result.stdout)
+                    except subprocess.CalledProcessError as e:
+                        print("Priority script Failure")
+                        print("Error Output:", e.stderr)
+                        raise SystemExit(1)
+                print(f"No priority Flag: {datetime.now()}")
+                df = pd.read_sql("SELECT a.request_id,a.week,a.query,a.decile_wise_report_path,b.client_name,a.SUPP_PATH,a.client_id,a.priority_file FROM APT_CUSTOM_POSTBACK_REQUEST_DETAILS_DND a,apt_custom_client_info_table_dnd b  WHERE request_id="+request_id+" and a.client_id=b.client_id", con=engine)
                 trt_tb=("apt_custom_"+str(df['request_id'][0])+"_"+df['client_name'][0]+"_"+df['week'][0]+"_trt_table").lower()
                 df3 = pd.read_csv(df['decile_wise_report_path'][0], sep='|', header=None, thousands=',')
                 df3.columns = ['Delivered', 'Opens', 'clicks', 'unsubs', 'segment', 'sub_seg', 'decile','old_per']
                 client_id=int(df['client_id'][0])
+                Audit_TRT_limit=df3['Delivered'].sum()+5000000
                 dcnt = len(df3['decile'].drop_duplicates())
                 client = ''
                 sup_l='True'
@@ -189,10 +222,6 @@ if __name__ == "__main__":
                     if not sup[0].str.contains('@').any():
                         logger.info("Adding index on md5 level")
                         sup_l='True'
-                # Create a base Presto connection for sampling
-                
-                
-                
                 qry=df['query'][0].split(';')
                 qry= [item for item in qry if re.search(r'apt_rltp_request_raw_', item)]
                 indx_creation=len(qry)
@@ -201,7 +230,7 @@ if __name__ == "__main__":
                     econn,sfcur=getSnowflake()
                 else:
                     econn= presto.connect(**presto_config)
-                    
+
                 try:
                     samp = pd.read_sql(sqr, con=econn)
                 except Exception as e:
@@ -243,7 +272,7 @@ if __name__ == "__main__":
                 manager= Manager()
                 shared_event=manager.Event()
                 with Pool(processes=5,initializer=init_worker,initargs=(shared_event,)) as pool:
-                    pool.map(main, [(client, trt_tb, qr, presto_config, pg_config,sup_l,n,deciles_,indx_val,indx_creation,client_id) for client in decilel])
+                    pool.map(main, [(client, trt_tb, qr, presto_config, pg_config,sup_l,n,deciles_,indx_val,indx_creation,client_id,Audit_TRT_limit) for client in decilel])
                 indx_val=indx_val+1
                 logger.info("All threads for TRT are completed.")
             except Exception as e:
@@ -273,3 +302,4 @@ if __name__ == "__main__":
     finally:
         cursor.close()
         conn.close()
+
